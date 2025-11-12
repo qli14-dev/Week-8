@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamlike Memory - A Journey Back</title>
+    <title>Family Conflict - An Emotional Journey</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,27 +11,24 @@
     <div id="loading-screen">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p>Loading memories...</p>
+            <p>Loading your story...</p>
         </div>
     </div>
 
-    <!-- Letter Introduction Screen -->
-    <div id="letter-screen">
-        <div class="letter-container">
-            <div class="letter-glow"></div>
-            <div class="letter">
-                <div class="letter-content">
-                    <p class="letter-date">September 2015</p>
-                    <p class="letter-text">
-                        "Do you remember those golden afternoons?<br>
-                        When time moved slowly,<br>
-                        and every moment felt infinite...<br><br>
-                        Let me take you back."
-                    </p>
-                    <p class="letter-signature">— A Memory</p>
-                </div>
+    <!-- Introduction Screen -->
+    <div id="intro-screen">
+        <div class="intro-container">
+            <div class="intro-glow"></div>
+            <div class="intro-content">
+                <h1 class="intro-title">The Weight of Words</h1>
+                <p class="intro-text">
+                    Tonight, voices rise where once there was warmth.<br>
+                    The air grows thick with tension.<br>
+                    And you stand at the center of it all...<br><br>
+                    How will you respond?
+                </p>
+                <button class="enter-button">Enter the Story</button>
             </div>
-            <p class="instruction">Click the letter to remember</p>
         </div>
     </div>
 
@@ -40,36 +37,63 @@
 
     <!-- UI Overlay -->
     <div id="ui-overlay" class="hidden">
-        <div class="memory-title">
-            <h1>Summer of '15</h1>
-            <p class="subtitle">A Classroom Remembered</p>
+        <div class="scene-title">
+            <h1 id="scene-title-text">The Argument</h1>
+            <p class="subtitle" id="scene-subtitle">A moment that will define everything</p>
         </div>
 
         <div class="controls-hint">
             <p>🖱️ Move mouse to look around</p>
-            <p>🖱️ Click the desk to drink water</p>
+            <p>👆 Click objects to explore details</p>
         </div>
 
-        <div class="atmosphere-text hidden" id="desk-message">
-            <p class="fade-text">The water tastes like summer days...</p>
+        <!-- Choice Buttons -->
+        <div id="choice-container" class="hidden">
+            <button class="choice-button communicate-button" id="communicate-btn">
+                <span class="choice-icon">💬</span>
+                <span class="choice-text">Communicate</span>
+                <span class="choice-description">Stay and talk it through</span>
+            </button>
+            <button class="choice-button runaway-button" id="runaway-btn">
+                <span class="choice-icon">🚶</span>
+                <span class="choice-text">Run Away</span>
+                <span class="choice-description">Leave and find yourself</span>
+            </button>
         </div>
+
+        <!-- Dialogue Bubbles -->
+        <div id="dialogue-container"></div>
+
+        <!-- Atmospheric Messages -->
+        <div class="atmosphere-text hidden" id="atmosphere-message">
+            <p class="fade-text"></p>
+        </div>
+
+        <!-- Memory Fragments -->
+        <div id="memory-fragments" class="hidden"></div>
     </div>
 
     <!-- Audio Elements -->
-    <audio id="ambient-sound" loop>
-        <source src="ambient.mp3" type="audio/mpeg">
+    <audio id="ambient-tension" loop>
+        <!-- Tension atmosphere sound -->
     </audio>
-    <audio id="water-sound">
-        <source src="water.mp3" type="audio/mpeg">
+    <audio id="ambient-peace" loop>
+        <!-- Peaceful reconciliation music -->
+    </audio>
+    <audio id="ambient-street" loop>
+        <!-- Street ambient sounds -->
+    </audio>
+    <audio id="footstep-sound">
+        <!-- Footstep sound effect -->
     </audio>
     <audio id="transition-sound">
-        <source src="transition.mp3" type="audio/mpeg">
+        <!-- Transition sound -->
     </audio>
 
     <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Main Application Script -->
-    <script src="app.js"></script>
+    <script src="family-conflict.js"></script>
 </body>
 </html>
