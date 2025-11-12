@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamlike Memory - A Journey Back</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Loading memories...</p>
+        </div>
+    </div>
+
+    <!-- Letter Introduction Screen -->
+    <div id="letter-screen">
+        <div class="letter-container">
+            <div class="letter-glow"></div>
+            <div class="letter">
+                <div class="letter-content">
+                    <p class="letter-date">September 2015</p>
+                    <p class="letter-text">
+                        "Do you remember those golden afternoons?<br>
+                        When time moved slowly,<br>
+                        and every moment felt infinite...<br><br>
+                        Let me take you back."
+                    </p>
+                    <p class="letter-signature">— A Memory</p>
+                </div>
+            </div>
+            <p class="instruction">Click the letter to remember</p>
+        </div>
+    </div>
+
+    <!-- 3D Scene Canvas -->
+    <canvas id="scene-canvas"></canvas>
+
+    <!-- UI Overlay -->
+    <div id="ui-overlay" class="hidden">
+        <div class="memory-title">
+            <h1>Summer of '15</h1>
+            <p class="subtitle">A Classroom Remembered</p>
+        </div>
+
+        <div class="controls-hint">
+            <p>🖱️ Move mouse to look around</p>
+            <p>🖱️ Click the desk to drink water</p>
+        </div>
+
+        <div class="atmosphere-text hidden" id="desk-message">
+            <p class="fade-text">The water tastes like summer days...</p>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="ambient-sound" loop>
+        <source src="ambient.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="water-sound">
+        <source src="water.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="transition-sound">
+        <source src="transition.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Main Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>

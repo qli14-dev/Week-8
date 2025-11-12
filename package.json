@@ -1,0 +1,23 @@
+{
+  "name": "dreamlike-memory-scene",
+  "version": "1.0.0",
+  "description": "An immersive 3D interactive experience that transports you back to a nostalgic high school memory",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000 -o",
+    "dev": "npx http-server -p 8000 -o -c-1"
+  },
+  "keywords": [
+    "three.js",
+    "3d",
+    "interactive",
+    "memory",
+    "nostalgia",
+    "dreamlike",
+    "webgl"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}

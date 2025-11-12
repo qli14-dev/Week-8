@@ -1,0 +1,21 @@
+# Audio files (optional - users can add their own)
+*.mp3
+*.wav
+*.ogg
+
+# Node modules (if users install anything)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
