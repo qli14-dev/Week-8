@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamlike Memory - A Journey Back</title>
+    <title>Seaside Sunset - A Dreamlike Escape</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,23 +15,15 @@
         </div>
     </div>
 
-    <!-- Letter Introduction Screen -->
-    <div id="letter-screen">
-        <div class="letter-container">
-            <div class="letter-glow"></div>
-            <div class="letter">
-                <div class="letter-content">
-                    <p class="letter-date">September 2015</p>
-                    <p class="letter-text">
-                        "Do you remember those golden afternoons?<br>
-                        When time moved slowly,<br>
-                        and every moment felt infinite...<br><br>
-                        Let me take you back."
-                    </p>
-                    <p class="letter-signature">— A Memory</p>
-                </div>
+    <!-- Seashell Introduction Screen -->
+    <div id="seashell-screen">
+        <div class="seashell-container">
+            <div class="seashell-glow"></div>
+            <div class="seashell" id="seashell-trigger">
+                <div class="seashell-spiral"></div>
+                <div class="seashell-inner"></div>
             </div>
-            <p class="instruction">Click the letter to remember</p>
+            <p class="instruction">Click the seashell to begin your journey</p>
         </div>
     </div>
 
@@ -41,29 +33,29 @@
     <!-- UI Overlay -->
     <div id="ui-overlay" class="hidden">
         <div class="memory-title">
-            <h1>Summer of '15</h1>
-            <p class="subtitle">A Classroom Remembered</p>
+            <h1>Seaside Sunset</h1>
+            <p class="subtitle">A Dreamlike Escape</p>
         </div>
 
         <div class="controls-hint">
-            <p>🖱️ Move mouse to look around</p>
-            <p>🖱️ Click the desk to drink water</p>
+            <p>🖱️ Move mouse to look around the beach</p>
+            <p>✨ Feel the ocean breeze and watch the waves</p>
         </div>
 
-        <div class="atmosphere-text hidden" id="desk-message">
-            <p class="fade-text">The water tastes like summer days...</p>
+        <div class="atmosphere-text hidden" id="ocean-message">
+            <p class="fade-text">The sound of waves carries you away...</p>
         </div>
     </div>
 
     <!-- Audio Elements -->
-    <audio id="ambient-sound" loop>
-        <source src="ambient.mp3" type="audio/mpeg">
+    <audio id="ocean-waves-sound" loop>
+        <!-- Ocean waves ambient sound -->
     </audio>
-    <audio id="water-sound">
-        <source src="water.mp3" type="audio/mpeg">
+    <audio id="seashell-sound">
+        <!-- Initial seashell ocean sound -->
     </audio>
-    <audio id="transition-sound">
-        <source src="transition.mp3" type="audio/mpeg">
+    <audio id="ocean-breeze-sound" loop>
+        <!-- Gentle ocean breeze ambient sound -->
     </audio>
 
     <!-- Three.js Library -->
