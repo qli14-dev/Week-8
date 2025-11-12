@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamlike Memory - A Journey Back</title>
+    <title>The Choice - An Emotional Journey</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -21,14 +21,14 @@
             <div class="letter-glow"></div>
             <div class="letter">
                 <div class="letter-content">
-                    <p class="letter-date">September 2015</p>
+                    <p class="letter-date">A Moment in Time</p>
                     <p class="letter-text">
-                        "Do you remember those golden afternoons?<br>
-                        When time moved slowly,<br>
-                        and every moment felt infinite...<br><br>
-                        Let me take you back."
+                        "In the quiet of this room,<br>
+                        two hearts stand at a crossroads.<br>
+                        Every choice shapes our path...<br><br>
+                        What will you choose?"
                     </p>
-                    <p class="letter-signature">— A Memory</p>
+                    <p class="letter-signature">— Your Heart</p>
                 </div>
             </div>
             <p class="instruction">Click the letter to remember</p>
@@ -41,17 +41,35 @@
     <!-- UI Overlay -->
     <div id="ui-overlay" class="hidden">
         <div class="memory-title">
-            <h1>Summer of '15</h1>
-            <p class="subtitle">A Classroom Remembered</p>
+            <h1>The Choice</h1>
+            <p class="subtitle">What does your heart say?</p>
         </div>
 
         <div class="controls-hint">
-            <p>🖱️ Move mouse to look around</p>
-            <p>🖱️ Click the desk to drink water</p>
+            <p>Move mouse to look around</p>
         </div>
 
-        <div class="atmosphere-text hidden" id="desk-message">
-            <p class="fade-text">The water tastes like summer days...</p>
+        <!-- Choice Buttons -->
+        <div class="choice-buttons hidden" id="choice-buttons">
+            <button class="choice-btn breakup-btn" id="breakup-btn">
+                <span class="btn-icon">💔</span>
+                <span class="btn-text">Break Up</span>
+            </button>
+            <button class="choice-btn hug-btn" id="hug-btn">
+                <span class="btn-icon">🤗</span>
+                <span class="btn-text">Hug</span>
+            </button>
+        </div>
+
+        <!-- Emotional Messages -->
+        <div class="atmosphere-text hidden" id="breakup-message">
+            <p class="fade-text">Sometimes letting go is the hardest choice...</p>
+        </div>
+        <div class="atmosphere-text hidden" id="hug-message">
+            <p class="fade-text">In this embrace, forgiveness blooms...</p>
+        </div>
+        <div class="atmosphere-text hidden" id="ending-message">
+            <p class="fade-text"></p>
         </div>
     </div>
 
@@ -59,8 +77,14 @@
     <audio id="ambient-sound" loop>
         <source src="ambient.mp3" type="audio/mpeg">
     </audio>
-    <audio id="water-sound">
-        <source src="water.mp3" type="audio/mpeg">
+    <audio id="piano-sound" loop>
+        <source src="piano.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="footsteps-sound">
+        <source src="footsteps.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="door-close-sound">
+        <source src="door-close.mp3" type="audio/mpeg">
     </audio>
     <audio id="transition-sound">
         <source src="transition.mp3" type="audio/mpeg">
