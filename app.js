@@ -1,12 +1,12 @@
 // ===================================
-// DREAMLIKE MEMORY SCENE
+// DREAMLIKE RESTAURANT MEMORY SCENE
 // A 3D Interactive Experience
 // ===================================
 
 // Global variables
 let scene, camera, renderer, raycaster, mouse;
-let classroom, desk, waterGlass, particles;
-let clock, ambientSound, isSceneActive = false;
+let restaurant, table, noodleBowl, chopsticks, steamParticles, ambientParticles;
+let clock, backgroundMusic, conversationSound, isSceneActive = false;
 let mouseX = 0, mouseY = 0;
 let targetCameraX = 0, targetCameraY = 0;
 
@@ -34,11 +34,13 @@ function init() {
     // Initialize Three.js components
     initThreeJS();
     createLighting();
-    createClassroom();
-    createDesk();
-    createWaterGlass();
-    createParticles();
-    createWindows();
+    createRestaurant();
+    createTable();
+    createNoodleBowl();
+    createChopsticks();
+    createSteamParticles();
+    createAmbientParticles();
+    createLanterns();
 
     // Start animation loop
     animate();
@@ -51,18 +53,18 @@ function init() {
 function initThreeJS() {
     // Scene setup
     scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xffd4a3, 10, 50);
-    scene.background = new THREE.Color(0xffe4c4);
+    scene.fog = new THREE.Fog(0xffd4a3, 8, 35);
+    scene.background = new THREE.Color(0xffebcd);
 
     // Camera setup
     camera = new THREE.PerspectiveCamera(
-        60,
+        65,
         window.innerWidth / window.innerHeight,
         0.1,
         1000
     );
-    camera.position.set(0, 1.6, 5);
-    camera.lookAt(0, 1.5, 0);
+    camera.position.set(0, 1.5, 4);
+    camera.lookAt(0, 1, 0);
 
     // Renderer setup
     const canvas = document.getElementById('scene-canvas');
@@ -76,7 +78,7 @@ function initThreeJS() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.3;
 
     // Raycaster for mouse interactions
     raycaster = new THREE.Raycaster();
@@ -91,289 +93,400 @@ function initThreeJS() {
 // ===================================
 
 function createLighting() {
-    // Ambient light - soft and warm
-    const ambientLight = new THREE.AmbientLight(0xffd4a3, 0.5);
+    // Warm ambient light
+    const ambientLight = new THREE.AmbientLight(0xffd89b, 0.6);
     scene.add(ambientLight);
 
-    // Golden sunlight from window
-    const sunLight = new THREE.DirectionalLight(0xffd89b, 1.5);
-    sunLight.position.set(-5, 8, 3);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 50;
-    sunLight.shadow.camera.left = -10;
-    sunLight.shadow.camera.right = 10;
-    sunLight.shadow.camera.top = 10;
-    sunLight.shadow.camera.bottom = -10;
-    scene.add(sunLight);
+    // Golden overhead light (like restaurant pendant lamps)
+    const overheadLight = new THREE.PointLight(0xffcc80, 1.5, 15);
+    overheadLight.position.set(0, 4, 0);
+    overheadLight.castShadow = true;
+    overheadLight.shadow.mapSize.width = 2048;
+    overheadLight.shadow.mapSize.height = 2048;
+    scene.add(overheadLight);
 
-    // Additional soft fill light
-    const fillLight = new THREE.PointLight(0xffebcd, 0.8, 20);
-    fillLight.position.set(3, 3, 2);
+    // Warm side lighting
+    const sideLight1 = new THREE.PointLight(0xffd4a3, 0.8, 12);
+    sideLight1.position.set(-4, 2.5, 2);
+    sideLight1.castShadow = true;
+    scene.add(sideLight1);
+
+    const sideLight2 = new THREE.PointLight(0xffd4a3, 0.8, 12);
+    sideLight2.position.set(4, 2.5, -2);
+    sideLight2.castShadow = true;
+    scene.add(sideLight2);
+
+    // Soft fill light
+    const fillLight = new THREE.DirectionalLight(0xffe4b5, 0.4);
+    fillLight.position.set(3, 5, 5);
     scene.add(fillLight);
 
-    // Rim light for depth
-    const rimLight = new THREE.DirectionalLight(0xffc9a3, 0.6);
-    rimLight.position.set(5, 3, -5);
-    scene.add(rimLight);
-
-    // Animated subtle light for atmosphere
-    const atmosphereLight = new THREE.PointLight(0xffd4a3, 0.5, 15);
+    // Animated atmosphere light
+    const atmosphereLight = new THREE.PointLight(0xffd89b, 0.7, 10);
     atmosphereLight.position.set(0, 2, 0);
     atmosphereLight.userData.originalY = 2;
     scene.add(atmosphereLight);
 
     // Store for animation
     scene.userData.atmosphereLight = atmosphereLight;
+    scene.userData.overheadLight = overheadLight;
 }
 
 // ===================================
-// CLASSROOM ENVIRONMENT
+// RESTAURANT ENVIRONMENT
 // ===================================
 
-function createClassroom() {
-    classroom = new THREE.Group();
+function createRestaurant() {
+    restaurant = new THREE.Group();
 
-    // Floor
-    const floorGeometry = new THREE.PlaneGeometry(20, 20);
+    // Floor - wooden restaurant floor
+    const floorGeometry = new THREE.PlaneGeometry(25, 25);
     const floorMaterial = new THREE.MeshStandardMaterial({
-        color: 0xdeb887,
-        roughness: 0.8,
-        metalness: 0.2
+        color: 0x8b6f47,
+        roughness: 0.7,
+        metalness: 0.1
     });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
-    classroom.add(floor);
+    restaurant.add(floor);
 
-    // Walls
+    // Walls - warm restaurant walls
     const wallMaterial = new THREE.MeshStandardMaterial({
-        color: 0xfff8dc,
+        color: 0xffe4b5,
         roughness: 0.9,
-        metalness: 0.1
+        metalness: 0.05
     });
 
     // Back wall
     const backWall = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 6),
+        new THREE.PlaneGeometry(25, 8),
         wallMaterial
     );
-    backWall.position.set(0, 3, -10);
+    backWall.position.set(0, 4, -12);
     backWall.receiveShadow = true;
-    classroom.add(backWall);
+    restaurant.add(backWall);
 
     // Left wall
     const leftWall = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 6),
+        new THREE.PlaneGeometry(25, 8),
         wallMaterial
     );
-    leftWall.position.set(-10, 3, 0);
+    leftWall.position.set(-12, 4, 0);
     leftWall.rotation.y = Math.PI / 2;
     leftWall.receiveShadow = true;
-    classroom.add(leftWall);
+    restaurant.add(leftWall);
 
-    // Right wall (with windows)
+    // Right wall
     const rightWall = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 6),
+        new THREE.PlaneGeometry(25, 8),
         wallMaterial
     );
-    rightWall.position.set(10, 3, 0);
+    rightWall.position.set(12, 4, 0);
     rightWall.rotation.y = -Math.PI / 2;
     rightWall.receiveShadow = true;
-    classroom.add(rightWall);
+    restaurant.add(rightWall);
 
     // Ceiling
     const ceiling = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 20),
+        new THREE.PlaneGeometry(25, 25),
         new THREE.MeshStandardMaterial({
-            color: 0xfffaf0,
+            color: 0xfff8e7,
             roughness: 0.9
         })
     );
     ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.y = 6;
-    ceiling.receiveShadow = true;
-    classroom.add(ceiling);
+    ceiling.position.y = 8;
+    restaurant.add(ceiling);
 
-    // Chalkboard
-    const chalkboard = new THREE.Mesh(
-        new THREE.BoxGeometry(4, 2, 0.1),
-        new THREE.MeshStandardMaterial({
-            color: 0x2f4f2f,
-            roughness: 0.7
-        })
-    );
-    chalkboard.position.set(0, 3, -9.9);
-    classroom.add(chalkboard);
+    // Add some background tables
+    createBackgroundTables();
 
-    scene.add(classroom);
+    scene.add(restaurant);
 }
 
-// ===================================
-// WINDOWS WITH SUNLIGHT
-// ===================================
-
-function createWindows() {
-    const windowGroup = new THREE.Group();
-
-    for (let i = 0; i < 3; i++) {
-        // Window frame
-        const frameGeometry = new THREE.BoxGeometry(2, 2.5, 0.2);
-        const frameMaterial = new THREE.MeshStandardMaterial({
-            color: 0x8b7355,
-            roughness: 0.6
-        });
-        const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-        frame.position.set(9.9, 3, -4 + i * 3);
-        frame.rotation.y = -Math.PI / 2;
-
-        // Window glass with transparency
-        const glassGeometry = new THREE.PlaneGeometry(1.8, 2.3);
-        const glassMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xffd89b,
-            transparent: true,
-            opacity: 0.3,
-            roughness: 0.1,
-            metalness: 0.1,
-            transmission: 0.9,
-            thickness: 0.5
-        });
-        const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-        glass.position.set(9.85, 3, -4 + i * 3);
-        glass.rotation.y = -Math.PI / 2;
-
-        windowGroup.add(frame);
-        windowGroup.add(glass);
-
-        // Window light rays
-        const rayGeometry = new THREE.ConeGeometry(0.1, 3, 8);
-        const rayMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffd89b,
-            transparent: true,
-            opacity: 0.2
-        });
-        const ray = new THREE.Mesh(rayGeometry, rayMaterial);
-        ray.position.set(8, 3, -4 + i * 3);
-        ray.rotation.z = Math.PI / 2;
-        windowGroup.add(ray);
-    }
-
-    scene.add(windowGroup);
-}
-
-// ===================================
-// INTERACTIVE DESK
-// ===================================
-
-function createDesk() {
-    desk = new THREE.Group();
-    desk.name = 'desk';
-
-    // Desk top
-    const deskTopGeometry = new THREE.BoxGeometry(2, 0.1, 1.2);
-    const deskMaterial = new THREE.MeshStandardMaterial({
-        color: 0xcd853f,
+function createBackgroundTables() {
+    const tableMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8b4513,
         roughness: 0.6,
         metalness: 0.2
     });
-    const deskTop = new THREE.Mesh(deskTopGeometry, deskMaterial);
-    deskTop.position.y = 1;
-    deskTop.castShadow = true;
-    deskTop.receiveShadow = true;
-    desk.add(deskTop);
 
-    // Desk legs
-    const legGeometry = new THREE.BoxGeometry(0.1, 1, 0.1);
-    const legPositions = [
-        [-0.9, 0.5, -0.5],
-        [0.9, 0.5, -0.5],
-        [-0.9, 0.5, 0.5],
-        [0.9, 0.5, 0.5]
+    // Create a few tables in the background
+    const tablePositions = [
+        [-5, 0, -5],
+        [5, 0, -6],
+        [-6, 0, 2],
+        [6, 0, 3]
     ];
 
-    legPositions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeometry, deskMaterial);
-        leg.position.set(...pos);
+    tablePositions.forEach(pos => {
+        const bgTable = new THREE.Group();
+
+        // Table top
+        const top = new THREE.Mesh(
+            new THREE.BoxGeometry(1.5, 0.08, 1.2),
+            tableMaterial
+        );
+        top.position.y = 0.8;
+        top.castShadow = true;
+        top.receiveShadow = true;
+        bgTable.add(top);
+
+        // Single center leg
+        const leg = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.12, 0.8, 8),
+            tableMaterial
+        );
+        leg.position.y = 0.4;
         leg.castShadow = true;
-        desk.add(leg);
-    });
+        bgTable.add(leg);
 
-    desk.position.set(1, 0, 2);
-    desk.userData.clickable = true;
-    scene.add(desk);
+        bgTable.position.set(...pos);
+        restaurant.add(bgTable);
+    });
 }
 
 // ===================================
-// WATER GLASS
+// MAIN TABLE
 // ===================================
 
-function createWaterGlass() {
-    waterGlass = new THREE.Group();
-    waterGlass.name = 'waterGlass';
+function createTable() {
+    table = new THREE.Group();
+    table.name = 'table';
 
-    // Glass container
-    const glassGeometry = new THREE.CylinderGeometry(0.08, 0.06, 0.15, 16, 1, true);
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
+    const tableMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8b4513,
+        roughness: 0.5,
+        metalness: 0.3
+    });
+
+    // Round table top
+    const tableTop = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.2, 1.2, 0.08, 32),
+        tableMaterial
+    );
+    tableTop.position.y = 0.96;
+    tableTop.castShadow = true;
+    tableTop.receiveShadow = true;
+    table.add(tableTop);
+
+    // Table leg
+    const tableLeg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.18, 0.9, 16),
+        tableMaterial
+    );
+    tableLeg.position.y = 0.45;
+    tableLeg.castShadow = true;
+    table.add(tableLeg);
+
+    // Table base
+    const tableBase = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.5, 0.5, 0.05, 32),
+        tableMaterial
+    );
+    tableBase.position.y = 0.025;
+    tableBase.castShadow = true;
+    tableBase.receiveShadow = true;
+    table.add(tableBase);
+
+    table.position.set(0, 0, 0.5);
+    scene.add(table);
+}
+
+// ===================================
+// NOODLE BOWL
+// ===================================
+
+function createNoodleBowl() {
+    noodleBowl = new THREE.Group();
+    noodleBowl.name = 'noodleBowl';
+
+    // Bowl
+    const bowlGeometry = new THREE.SphereGeometry(0.3, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+    const bowlMaterial = new THREE.MeshStandardMaterial({
+        color: 0xf5e6d3,
+        roughness: 0.4,
+        metalness: 0.1
+    });
+    const bowl = new THREE.Mesh(bowlGeometry, bowlMaterial);
+    bowl.rotation.x = Math.PI;
+    bowl.position.y = 0.15;
+    bowl.castShadow = true;
+    bowl.receiveShadow = true;
+    noodleBowl.add(bowl);
+
+    // Broth/Soup
+    const brothGeometry = new THREE.CylinderGeometry(0.28, 0.25, 0.05, 32);
+    const brothMaterial = new THREE.MeshStandardMaterial({
+        color: 0xd4a574,
+        roughness: 0.3,
+        metalness: 0.2,
+        transparent: true,
+        opacity: 0.9
+    });
+    const broth = new THREE.Mesh(brothGeometry, brothMaterial);
+    broth.position.y = 0.275;
+    noodleBowl.add(broth);
+
+    // Noodles (using curved lines)
+    const noodlesGroup = new THREE.Group();
+    noodlesGroup.name = 'noodles';
+
+    for (let i = 0; i < 12; i++) {
+        const curve = new THREE.QuadraticBezierCurve3(
+            new THREE.Vector3(
+                (Math.random() - 0.5) * 0.3,
+                0.28,
+                (Math.random() - 0.5) * 0.3
+            ),
+            new THREE.Vector3(
+                (Math.random() - 0.5) * 0.2,
+                0.32,
+                (Math.random() - 0.5) * 0.2
+            ),
+            new THREE.Vector3(
+                (Math.random() - 0.5) * 0.3,
+                0.3,
+                (Math.random() - 0.5) * 0.3
+            )
+        );
+
+        const points = curve.getPoints(20);
+        const noodleGeometry = new THREE.BufferGeometry().setFromPoints(points);
+        const noodleMaterial = new THREE.LineBasicMaterial({
+            color: 0xf5deb3,
+            linewidth: 3
+        });
+        const noodle = new THREE.Line(noodleGeometry, noodleMaterial);
+        noodlesGroup.add(noodle);
+    }
+
+    noodleBowl.add(noodlesGroup);
+    noodleBowl.userData.noodles = noodlesGroup;
+
+    // Add some toppings for realism
+    // Green onion pieces
+    for (let i = 0; i < 5; i++) {
+        const onion = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.008, 0.008, 0.04, 8),
+            new THREE.MeshStandardMaterial({ color: 0x228b22 })
+        );
+        onion.position.set(
+            (Math.random() - 0.5) * 0.25,
+            0.31,
+            (Math.random() - 0.5) * 0.25
+        );
+        onion.rotation.x = Math.random() * Math.PI;
+        onion.rotation.z = Math.random() * Math.PI;
+        noodleBowl.add(onion);
+    }
+
+    noodleBowl.position.set(0, 1.0, 0.5);
+    noodleBowl.userData.clickable = true;
+    scene.add(noodleBowl);
+}
+
+// ===================================
+// CHOPSTICKS
+// ===================================
+
+function createChopsticks() {
+    chopsticks = new THREE.Group();
+
+    const chopstickMaterial = new THREE.MeshStandardMaterial({
+        color: 0x8b4513,
+        roughness: 0.6,
+        metalness: 0.1
+    });
+
+    // First chopstick
+    const chopstick1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.01, 0.01, 0.35, 8),
+        chopstickMaterial
+    );
+    chopstick1.position.set(0.25, 1.02, 0.4);
+    chopstick1.rotation.z = Math.PI / 2;
+    chopstick1.rotation.y = -0.3;
+    chopstick1.castShadow = true;
+    chopsticks.add(chopstick1);
+
+    // Second chopstick
+    const chopstick2 = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.01, 0.01, 0.35, 8),
+        chopstickMaterial
+    );
+    chopstick2.position.set(0.25, 1.02, 0.45);
+    chopstick2.rotation.z = Math.PI / 2;
+    chopstick2.rotation.y = -0.25;
+    chopstick2.castShadow = true;
+    chopsticks.add(chopstick2);
+
+    scene.add(chopsticks);
+}
+
+// ===================================
+// STEAM PARTICLES
+// ===================================
+
+function createSteamParticles() {
+    const particleCount = 100;
+    const particlesGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = [];
+    const lifetimes = [];
+
+    for (let i = 0; i < particleCount; i++) {
+        // Start near the bowl
+        positions[i * 3] = (Math.random() - 0.5) * 0.3;
+        positions[i * 3 + 1] = 1.3 + Math.random() * 0.5;
+        positions[i * 3 + 2] = 0.5 + (Math.random() - 0.5) * 0.3;
+
+        velocities.push({
+            x: (Math.random() - 0.5) * 0.002,
+            y: 0.008 + Math.random() * 0.005,
+            z: (Math.random() - 0.5) * 0.002
+        });
+
+        lifetimes.push(Math.random());
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
+        size: 0.08,
         transparent: true,
-        opacity: 0.3,
-        roughness: 0.1,
-        metalness: 0.1,
-        transmission: 0.9,
-        thickness: 0.5,
-        clearcoat: 1.0
+        opacity: 0.4,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
     });
-    const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-    glass.castShadow = true;
-    waterGlass.add(glass);
 
-    // Water inside
-    const waterGeometry = new THREE.CylinderGeometry(0.075, 0.058, 0.12, 16);
-    const waterMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x87ceeb,
-        transparent: true,
-        opacity: 0.6,
-        roughness: 0.1,
-        metalness: 0.1,
-        transmission: 0.8
-    });
-    const water = new THREE.Mesh(waterGeometry, waterMaterial);
-    water.position.y = -0.015;
-    waterGlass.add(water);
-
-    // Glass bottom
-    const bottomGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.01, 16);
-    const bottom = new THREE.Mesh(bottomGeometry, glassMaterial);
-    bottom.position.y = -0.075;
-    waterGlass.add(bottom);
-
-    waterGlass.position.set(1.3, 1.13, 2);
-    waterGlass.userData.clickable = true;
-    waterGlass.userData.water = water;
-    scene.add(waterGlass);
+    steamParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+    steamParticles.userData.velocities = velocities;
+    steamParticles.userData.lifetimes = lifetimes;
+    scene.add(steamParticles);
 }
 
 // ===================================
-// PARTICLE SYSTEM
+// AMBIENT PARTICLES
 // ===================================
 
-function createParticles() {
-    const particleCount = 200;
+function createAmbientParticles() {
+    const particleCount = 150;
     const particlesGeometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const velocities = [];
 
     for (let i = 0; i < particleCount; i++) {
         positions[i * 3] = (Math.random() - 0.5) * 20;
-        positions[i * 3 + 1] = Math.random() * 6;
+        positions[i * 3 + 1] = Math.random() * 8;
         positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
 
         velocities.push({
-            x: (Math.random() - 0.5) * 0.01,
-            y: (Math.random() - 0.5) * 0.01,
-            z: (Math.random() - 0.5) * 0.01
+            x: (Math.random() - 0.5) * 0.008,
+            y: (Math.random() - 0.5) * 0.008,
+            z: (Math.random() - 0.5) * 0.008
         });
     }
 
@@ -381,16 +494,65 @@ function createParticles() {
 
     const particlesMaterial = new THREE.PointsMaterial({
         color: 0xffd89b,
-        size: 0.05,
+        size: 0.04,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.5,
         blending: THREE.AdditiveBlending,
         sizeAttenuation: true
     });
 
-    particles = new THREE.Points(particlesGeometry, particlesMaterial);
-    particles.userData.velocities = velocities;
-    scene.add(particles);
+    ambientParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+    ambientParticles.userData.velocities = velocities;
+    scene.add(ambientParticles);
+}
+
+// ===================================
+// DECORATIVE LANTERNS
+// ===================================
+
+function createLanterns() {
+    const lanternPositions = [
+        [-4, 3.5, -6],
+        [4, 3.5, -6],
+        [-5, 3.5, 4],
+        [5, 3.5, 4]
+    ];
+
+    lanternPositions.forEach(pos => {
+        const lantern = new THREE.Group();
+
+        // Lantern body
+        const body = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.2, 0.4, 6),
+            new THREE.MeshStandardMaterial({
+                color: 0xff4444,
+                emissive: 0xff2222,
+                emissiveIntensity: 0.3,
+                roughness: 0.5
+            })
+        );
+        body.castShadow = true;
+        lantern.add(body);
+
+        // Top cap
+        const topCap = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.15, 0.22, 0.05, 6),
+            new THREE.MeshStandardMaterial({ color: 0x8b7355 })
+        );
+        topCap.position.y = 0.225;
+        lantern.add(topCap);
+
+        // Bottom cap
+        const bottomCap = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.22, 0.15, 0.05, 6),
+            new THREE.MeshStandardMaterial({ color: 0x8b7355 })
+        );
+        bottomCap.position.y = -0.225;
+        lantern.add(bottomCap);
+
+        lantern.position.set(...pos);
+        scene.add(lantern);
+    });
 }
 
 // ===================================
@@ -398,11 +560,11 @@ function createParticles() {
 // ===================================
 
 function setupEventListeners() {
-    // Letter click to enter scene
-    const letterScreen = document.getElementById('letter-screen');
-    const letter = document.querySelector('.letter');
+    // Phone click to enter scene
+    const phoneScreen = document.getElementById('phone-screen');
+    const phone = document.querySelector('.phone');
 
-    letter.addEventListener('click', () => {
+    phone.addEventListener('click', () => {
         enterMemoryScene();
     });
 
@@ -422,8 +584,8 @@ function onMouseMove(event) {
     mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    targetCameraX = mouseX * 1.5;
-    targetCameraY = mouseY * 0.8;
+    targetCameraX = mouseX * 2;
+    targetCameraY = mouseY * 0.6;
 }
 
 function onMouseClick(event) {
@@ -445,8 +607,8 @@ function onMouseClick(event) {
             object = object.parent;
         }
 
-        if (object.userData.clickable && object.name === 'waterGlass') {
-            drinkWater();
+        if (object.userData.clickable && object.name === 'noodleBowl') {
+            eatNoodles();
             break;
         }
     }
@@ -463,20 +625,21 @@ function onWindowResize() {
 // ===================================
 
 function enterMemoryScene() {
-    const letterScreen = document.getElementById('letter-screen');
+    const phoneScreen = document.getElementById('phone-screen');
     const canvas = document.getElementById('scene-canvas');
     const uiOverlay = document.getElementById('ui-overlay');
     const transitionSound = document.getElementById('transition-sound');
-    const ambientSoundElement = document.getElementById('ambient-sound');
+    const backgroundMusicElement = document.getElementById('background-music');
+    const conversationSoundElement = document.getElementById('conversation-sound');
 
     // Play transition sound
     if (transitionSound) {
-        transitionSound.volume = 0.5;
+        transitionSound.volume = 0.4;
         transitionSound.play().catch(e => console.log('Transition sound error:', e));
     }
 
-    // Fade out letter screen
-    letterScreen.classList.add('hidden');
+    // Fade out phone screen
+    phoneScreen.classList.add('hidden');
 
     // Fade in 3D scene
     setTimeout(() => {
@@ -484,10 +647,16 @@ function enterMemoryScene() {
         uiOverlay.classList.remove('hidden');
         isSceneActive = true;
 
-        // Start ambient sound
-        if (ambientSoundElement) {
-            ambientSoundElement.volume = 0.3;
-            ambientSoundElement.play().catch(e => console.log('Ambient sound error:', e));
+        // Start background music
+        if (backgroundMusicElement) {
+            backgroundMusicElement.volume = 0.25;
+            backgroundMusicElement.play().catch(e => console.log('Music error:', e));
+        }
+
+        // Start conversation ambient sound
+        if (conversationSoundElement) {
+            conversationSoundElement.volume = 0.15;
+            conversationSoundElement.play().catch(e => console.log('Conversation sound error:', e));
         }
     }, 500);
 }
@@ -496,78 +665,80 @@ function enterMemoryScene() {
 // INTERACTIONS
 // ===================================
 
-function drinkWater() {
-    const deskMessage = document.getElementById('desk-message');
-    const waterSound = document.getElementById('water-sound');
+function eatNoodles() {
+    const noodleMessage = document.getElementById('noodle-message');
+    const eatingSound = document.getElementById('eating-sound');
 
-    // Play water sound
-    if (waterSound) {
-        waterSound.volume = 0.6;
-        waterSound.play().catch(e => console.log('Water sound error:', e));
+    // Play eating sound
+    if (eatingSound) {
+        eatingSound.volume = 0.5;
+        eatingSound.currentTime = 0;
+        eatingSound.play().catch(e => console.log('Eating sound error:', e));
     }
 
     // Show message
-    deskMessage.classList.remove('hidden');
+    noodleMessage.classList.remove('hidden');
 
     setTimeout(() => {
-        deskMessage.classList.add('hidden');
+        noodleMessage.classList.add('hidden');
     }, 4000);
 
-    // Animate water glass
-    animateWaterGlass();
+    // Animate noodles being eaten
+    animateNoodleEating();
 }
 
-function animateWaterGlass() {
-    const initialY = waterGlass.position.y;
-    const water = waterGlass.userData.water;
-    const duration = 2000;
+function animateNoodleEating() {
+    const noodles = noodleBowl.userData.noodles;
+    const duration = 2500;
     const startTime = Date.now();
+    const initialScale = noodles.scale.clone();
 
     function animate() {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
+        // Noodles shrink and rotate slightly
+        const scale = 1 - progress * 0.6;
+        noodles.scale.set(scale, scale, scale);
+        noodles.rotation.y = progress * Math.PI * 0.5;
+        noodles.position.y = 0.28 - progress * 0.1;
+
+        // Bowl tilts slightly
         if (progress < 0.3) {
-            // Lift glass
-            waterGlass.position.y = initialY + Math.sin(progress * Math.PI * 3.33) * 0.3;
-        } else if (progress < 0.7) {
-            // Drink (reduce water level)
-            const drinkProgress = (progress - 0.3) / 0.4;
-            water.scale.y = 1 - drinkProgress * 0.7;
-            water.position.y = -0.015 - drinkProgress * 0.04;
+            noodleBowl.rotation.x = Math.sin(progress * Math.PI * 3.33) * 0.15;
         } else {
-            // Put down glass
-            const putDownProgress = (progress - 0.7) / 0.3;
-            waterGlass.position.y = initialY + 0.3 * (1 - putDownProgress);
+            noodleBowl.rotation.x = 0;
         }
 
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            waterGlass.position.y = initialY;
-            // Refill water after a moment
+            // Restore noodles after a moment
             setTimeout(() => {
-                animateWaterRefill();
-            }, 1000);
+                restoreNoodles(initialScale);
+            }, 1500);
         }
     }
 
     animate();
 }
 
-function animateWaterRefill() {
-    const water = waterGlass.userData.water;
-    const duration = 1500;
+function restoreNoodles(initialScale) {
+    const noodles = noodleBowl.userData.noodles;
+    const duration = 2000;
     const startTime = Date.now();
-    const startScale = water.scale.y;
-    const startPosY = water.position.y;
+    const startScale = noodles.scale.clone();
+    const startRotation = noodles.rotation.y;
+    const startPosY = noodles.position.y;
 
     function animate() {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        water.scale.y = startScale + (1 - startScale) * progress;
-        water.position.y = startPosY + (-0.015 - startPosY) * progress;
+        // Smoothly restore
+        noodles.scale.lerpVectors(startScale, initialScale, progress);
+        noodles.rotation.y = startRotation * (1 - progress);
+        noodles.position.y = startPosY + (0.28 - startPosY) * progress;
 
         if (progress < 1) {
             requestAnimationFrame(animate);
@@ -589,47 +760,85 @@ function animate() {
     if (isSceneActive) {
         // Smooth camera movement based on mouse
         camera.position.x += (targetCameraX - camera.position.x) * CAMERA_MOVE_SPEED;
-        camera.position.y += (1.6 + targetCameraY - camera.position.y) * CAMERA_MOVE_SPEED;
-        camera.lookAt(0, 1.5, 0);
+        camera.position.y += (1.5 + targetCameraY - camera.position.y) * CAMERA_MOVE_SPEED;
+        camera.lookAt(0, 1, 0);
 
         // Animate atmosphere light
         if (scene.userData.atmosphereLight) {
             const light = scene.userData.atmosphereLight;
-            light.intensity = 0.5 + Math.sin(elapsedTime * 0.5) * 0.2;
-            light.position.y = light.userData.originalY + Math.sin(elapsedTime * 0.3) * 0.5;
+            light.intensity = 0.7 + Math.sin(elapsedTime * 0.4) * 0.2;
         }
 
-        // Animate particles
-        if (particles) {
-            const positions = particles.geometry.attributes.position.array;
-            const velocities = particles.userData.velocities;
+        // Animate overhead light (flickering effect)
+        if (scene.userData.overheadLight) {
+            const light = scene.userData.overheadLight;
+            light.intensity = 1.5 + Math.sin(elapsedTime * 3) * 0.05;
+        }
+
+        // Animate steam particles
+        if (steamParticles) {
+            const positions = steamParticles.geometry.attributes.position.array;
+            const velocities = steamParticles.userData.velocities;
+            const lifetimes = steamParticles.userData.lifetimes;
 
             for (let i = 0; i < positions.length / 3; i++) {
                 positions[i * 3] += velocities[i].x;
-                positions[i * 3 + 1] += velocities[i].y + Math.sin(elapsedTime + i) * 0.001;
+                positions[i * 3 + 1] += velocities[i].y;
+                positions[i * 3 + 2] += velocities[i].z;
+
+                // Update lifetime
+                lifetimes[i] += 0.01;
+
+                // Reset particle if it's too high or old
+                if (positions[i * 3 + 1] > 2.5 || lifetimes[i] > 1) {
+                    positions[i * 3] = (Math.random() - 0.5) * 0.3;
+                    positions[i * 3 + 1] = 1.3;
+                    positions[i * 3 + 2] = 0.5 + (Math.random() - 0.5) * 0.3;
+                    lifetimes[i] = 0;
+                }
+            }
+
+            steamParticles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // Animate ambient particles
+        if (ambientParticles) {
+            const positions = ambientParticles.geometry.attributes.position.array;
+            const velocities = ambientParticles.userData.velocities;
+
+            for (let i = 0; i < positions.length / 3; i++) {
+                positions[i * 3] += velocities[i].x;
+                positions[i * 3 + 1] += velocities[i].y + Math.sin(elapsedTime * 0.5 + i) * 0.0005;
                 positions[i * 3 + 2] += velocities[i].z;
 
                 // Wrap particles
                 if (positions[i * 3] > 10) positions[i * 3] = -10;
                 if (positions[i * 3] < -10) positions[i * 3] = 10;
-                if (positions[i * 3 + 1] > 6) positions[i * 3 + 1] = 0;
-                if (positions[i * 3 + 1] < 0) positions[i * 3 + 1] = 6;
+                if (positions[i * 3 + 1] > 8) positions[i * 3 + 1] = 0;
+                if (positions[i * 3 + 1] < 0) positions[i * 3 + 1] = 8;
                 if (positions[i * 3 + 2] > 10) positions[i * 3 + 2] = -10;
                 if (positions[i * 3 + 2] < -10) positions[i * 3 + 2] = 10;
             }
 
-            particles.geometry.attributes.position.needsUpdate = true;
-            particles.rotation.y = elapsedTime * 0.05;
+            ambientParticles.geometry.attributes.position.needsUpdate = true;
+            ambientParticles.rotation.y = elapsedTime * 0.02;
         }
 
-        // Subtle desk breathing animation
-        if (desk) {
-            desk.position.y = Math.sin(elapsedTime * 0.5) * 0.02;
+        // Subtle table breathing animation
+        if (table) {
+            table.position.y = Math.sin(elapsedTime * 0.4) * 0.01;
         }
 
-        // Water glass subtle shimmer
-        if (waterGlass) {
-            waterGlass.rotation.y = Math.sin(elapsedTime * 0.3) * 0.05;
+        // Noodle bowl subtle animation
+        if (noodleBowl) {
+            noodleBowl.position.y = 1.0 + Math.sin(elapsedTime * 0.5) * 0.008;
+        }
+
+        // Chopsticks subtle movement
+        if (chopsticks) {
+            chopsticks.children.forEach((stick, index) => {
+                stick.rotation.x = Math.sin(elapsedTime * 0.3 + index) * 0.02;
+            });
         }
     }
 
@@ -640,5 +849,5 @@ function animate() {
 // CONSOLE MESSAGE
 // ===================================
 
-console.log('%c🌟 Dreamlike Memory Scene 🌟', 'color: #ffd89b; font-size: 20px; font-weight: bold;');
-console.log('%cWelcome to your memories...', 'color: #ffd89b; font-size: 14px;');
+console.log('%c🍜 Dreamlike Restaurant Memory 🍜', 'color: #ffd89b; font-size: 20px; font-weight: bold;');
+console.log('%cWelcome back to that warm afternoon...', 'color: #ffd89b; font-size: 14px;');

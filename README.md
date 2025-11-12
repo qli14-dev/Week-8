@@ -1,28 +1,36 @@
-# 🌟 Dreamlike Memory Scene
+# 🍜 Dreamlike Restaurant Memory Scene
 
-An immersive 3D interactive experience that transports you back to a nostalgic high school memory. Built with Three.js, this web-based experience combines beautiful visuals, smooth interactions, and a dreamlike atmosphere.
+An immersive 3D interactive narrative experience that transports you back to a nostalgic childhood memory. Click a phone to play music and journey into a dreamlike restaurant where you once ate noodles as a child. Built with Three.js, this web-based experience combines beautiful visuals, smooth interactions, and a warm nostalgic atmosphere.
 
 ![Dreamlike Memory Scene](https://img.shields.io/badge/Three.js-r128-blue) ![Status](https://img.shields.io/badge/status-ready-green)
 
 ## ✨ Features
 
 ### Visual Experience
-- **Nostalgic 3D Classroom**: A beautifully rendered classroom with warm, golden lighting
-- **Dreamlike Atmosphere**: Soft pastels, glowing effects, and ethereal particle systems
-- **Realistic Lighting**: Multiple light sources including golden sunlight streaming through windows
-- **Subtle Reflections**: Physically-based materials with realistic glass and water effects
-- **Warm Color Palette**: Pastel tones and soft golden hues create a memory-like ambiance
+- **Dreamlike Restaurant**: A beautifully rendered restaurant with warm, golden lighting
+- **Nostalgic Atmosphere**: Soft golden tones, glowing lanterns, and ethereal particle systems
+- **Realistic Lighting**: Multiple light sources including overhead pendant lamps and ambient lighting
+- **Steam Effects**: Gentle steam rising from hot noodle bowl
+- **Warm Color Palette**: Golden tones and warm hues create a comforting memory-like ambiance
+- **Background Tables**: Multiple tables in the background create depth and atmosphere
+
+### Narrative Experience
+- **Phone Introduction**: Click a phone displaying a music app to begin your journey
+- **Smooth Transition**: Cinematic fade from the present (phone) into the memory (restaurant)
+- **Memory Through Music**: The song triggers the transition into the dreamlike memory world
 
 ### Interactions
-- **Letter Introduction**: Click an old letter to enter the memory world
-- **Interactive Water Glass**: Click the desk to drink water with smooth animations
-- **Mouse-Based Camera**: Move your mouse left and right to explore the classroom
-- **Floating Particles**: Watch light particles drift through the air
+- **Interactive Phone**: Click the phone to play music and enter the memory
+- **Clickable Noodles**: Click the noodle bowl to eat with smooth eating animations
+- **Mouse-Based Camera**: Move your mouse left and right to explore the restaurant
+- **Steam Particles**: Watch gentle steam rise from the hot noodles
+- **Ambient Particles**: Golden light particles drift through the air
 - **Ambient Animations**: Subtle breathing effects and gentle movements
 
 ### Audio (Optional)
-- **Ambient Soundscape**: Continuous background atmosphere
-- **Water Sounds**: Realistic drinking sound effects
+- **Background Music**: Nostalgic melody that plays when entering the memory
+- **Conversation Sounds**: Faint echoes of restaurant conversations
+- **Eating Sounds**: Realistic eating sound effects
 - **Transition Audio**: Smooth audio cues during scene changes
 
 ## 🚀 Quick Start
@@ -70,31 +78,35 @@ An immersive 3D interactive experience that transports you back to a nostalgic h
 
 ## 🎮 How to Use
 
-1. **Start**: Click the old letter to enter the memory world
-2. **Look Around**: Move your mouse left and right to explore the classroom
-3. **Interact**: Click on the water glass on the desk to drink water
-4. **Immerse**: Enjoy the floating particles, gentle animations, and nostalgic atmosphere
+1. **Start**: Click the phone to play music and enter the memory world
+2. **Transition**: Watch as you smoothly transition from the present into a dreamlike restaurant memory
+3. **Look Around**: Move your mouse left and right to explore the restaurant
+4. **Interact**: Click on the noodle bowl to eat the noodles
+5. **Immerse**: Enjoy the steam effects, floating particles, gentle animations, and nostalgic atmosphere
 
 ## 🎵 Adding Audio (Optional)
 
 The experience includes audio support for enhanced immersion. To add audio files:
 
-1. Create three audio files in MP3 format:
-   - `ambient.mp3` - Soft ambient background music or nature sounds (2-3 minutes, looped)
-   - `water.mp3` - Water drinking sound effect (2-3 seconds)
+1. Create four audio files in MP3 format:
+   - `music.mp3` - Nostalgic background music that plays during the memory (2-3 minutes, looped)
+   - `conversation.mp3` - Faint restaurant conversation ambience (2-3 minutes, looped)
+   - `eating.mp3` - Eating/slurping noodle sounds (2-3 seconds)
    - `transition.mp3` - Gentle transition sound (3-5 seconds)
 
 2. Place them in the root directory alongside `index.html`
 
 3. **Recommended Audio**:
-   - **Ambient**: Soft piano, gentle rain, or classroom ambience
-   - **Water**: Glass clink and liquid drinking sounds
-   - **Transition**: Soft whoosh or gentle chime
+   - **Music**: Soft piano melody, nostalgic music box, or gentle acoustic guitar
+   - **Conversation**: Muffled restaurant chatter, distant voices (low volume)
+   - **Eating**: Noodle slurping, chopsticks clicking, gentle eating sounds
+   - **Transition**: Soft whoosh, gentle chime, or dreamy sound effect
 
 4. **Free Audio Resources**:
    - [Freesound.org](https://freesound.org)
    - [Free Music Archive](https://freemusicarchive.org)
    - [Incompetech](https://incompetech.com)
+   - [BBC Sound Effects](https://sound-effects.bbcrewind.co.uk/)
 
 **Note**: The experience works perfectly without audio files. The application will gracefully handle missing audio.
 
@@ -107,8 +119,9 @@ Week-8/
 ├── app.js              # Three.js scene and interactions
 ├── README.md           # This file
 └── (optional audio files)
-    ├── ambient.mp3     # Background ambient sound
-    ├── water.mp3       # Water drinking sound
+    ├── music.mp3       # Background nostalgic music
+    ├── conversation.mp3 # Restaurant ambient conversation
+    ├── eating.mp3      # Eating sound effect
     └── transition.mp3  # Scene transition sound
 ```
 
@@ -170,41 +183,47 @@ You can add more interactive objects by:
 
 ## 🎯 Features Breakdown
 
-### 1. Letter Introduction
-- Elegant typography with serif fonts
-- Floating animation with glow effects
+### 1. Phone Introduction
+- Modern smartphone UI with music app
+- Spinning vinyl record animation
+- Pulsing play button with glow effects
 - Smooth fade transition to 3D scene
-- Poetic content that sets the mood
+- Floating animation creates dreamlike feel
 
-### 2. 3D Classroom Environment
-- Wooden floor with realistic materials
+### 2. 3D Restaurant Environment
+- Wooden floor with warm brown tones
 - Cream-colored walls
-- Chalkboard on the back wall
-- Three windows with golden sunlight
+- Round main table with realistic materials
+- Background tables create depth
+- Red decorative lanterns
 - Proper shadow casting and receiving
 
 ### 3. Lighting System
-- **Ambient Light**: Soft warm base lighting
-- **Sun Light**: Directional light with shadows
-- **Fill Light**: Point light for softer shadows
-- **Rim Light**: Adds depth and dimension
+- **Ambient Light**: Warm golden base lighting
+- **Overhead Light**: Central pendant lamp with subtle flicker
+- **Side Lights**: Multiple point lights for atmosphere
+- **Fill Light**: Directional light for softer shadows
 - **Atmosphere Light**: Animated pulsing effect
+- **Lantern Glow**: Emissive lanterns add warm accent lighting
 
 ### 4. Interactive Elements
-- **Water Glass**: Click to trigger drinking animation
-  - Glass lifts up
-  - Water level decreases
-  - Glass returns to desk
-  - Water automatically refills
+- **Noodle Bowl**: Click to trigger eating animation
+  - Bowl tilts slightly
+  - Noodles shrink and rotate
+  - Noodles automatically restore
+  - Nostalgic message appears
 - **Camera Control**: Smooth mouse-based movement
-- **Particle System**: 200 floating light particles
+- **Steam Particles**: 100 rising steam particles from hot noodles
+- **Ambient Particles**: 150 floating golden light particles
 
 ### 5. Visual Effects
-- Particle system with additive blending
-- Realistic glass materials with transmission
-- Water with transparency and refraction
-- Window light rays
-- Subtle ambient animations
+- Dual particle systems (steam and ambient) with additive blending
+- Realistic bowl and broth materials
+- Curved noodle geometry using Bezier curves
+- Chopsticks positioned beside the bowl
+- Steam rising from hot noodles
+- Decorative lanterns with emissive glow
+- Subtle ambient animations throughout the scene
 
 ## 🐛 Troubleshooting
 
@@ -220,13 +239,14 @@ You can add more interactive objects by:
 - Ensure audio files are in the correct format (MP3)
 
 ### Poor Performance
-- Try reducing particle count in `app.js` (line ~308)
+- Try reducing particle counts in `app.js` (steam: line ~433, ambient: line ~476)
 - Disable shadows by setting `renderer.shadowMap.enabled = false`
 - Reduce shadow map resolution
+- Reduce number of background tables
 
 ### Mouse Controls Not Working
 - Wait for the scene to fully load
-- Click the letter first to enter the scene
+- Click the phone first to enter the scene
 - Check if JavaScript is enabled
 
 ## 📱 Mobile Support
@@ -258,15 +278,17 @@ This project is open source and available for educational purposes.
 ## 🚀 Future Enhancements
 
 Potential features to add:
-- [ ] More interactive objects (books, pencils, etc.)
-- [ ] Multiple classroom scenes
+- [ ] More interactive objects (tea cup, menu, plates, etc.)
+- [ ] Multiple restaurant memories
+- [ ] Other customers in the background
 - [ ] VR support with WebXR
 - [ ] Procedural audio generation
-- [ ] Seasonal variations
-- [ ] Student desk interactions
-- [ ] Time of day changes
+- [ ] Different times of day (lunch, dinner)
+- [ ] Waiter/waitress character
+- [ ] More food items
 - [ ] Save/load camera positions
 - [ ] Screenshot functionality
+- [ ] Photo album mode
 
 ## 💬 Feedback
 

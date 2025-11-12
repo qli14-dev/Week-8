@@ -15,23 +15,25 @@
         </div>
     </div>
 
-    <!-- Letter Introduction Screen -->
-    <div id="letter-screen">
-        <div class="letter-container">
-            <div class="letter-glow"></div>
-            <div class="letter">
-                <div class="letter-content">
-                    <p class="letter-date">September 2015</p>
-                    <p class="letter-text">
-                        "Do you remember those golden afternoons?<br>
-                        When time moved slowly,<br>
-                        and every moment felt infinite...<br><br>
-                        Let me take you back."
-                    </p>
-                    <p class="letter-signature">— A Memory</p>
+    <!-- Phone Introduction Screen -->
+    <div id="phone-screen">
+        <div class="phone-container">
+            <div class="phone-glow"></div>
+            <div class="phone">
+                <div class="phone-screen-display">
+                    <div class="music-app">
+                        <div class="album-art">
+                            <div class="vinyl-record"></div>
+                        </div>
+                        <p class="song-title">Summer Memory</p>
+                        <p class="artist">Childhood Echoes</p>
+                        <div class="play-button">
+                            <div class="play-icon">▶</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p class="instruction">Click the letter to remember</p>
+            <p class="instruction">Tap the phone to play the song</p>
         </div>
     </div>
 
@@ -41,26 +43,29 @@
     <!-- UI Overlay -->
     <div id="ui-overlay" class="hidden">
         <div class="memory-title">
-            <h1>Summer of '15</h1>
-            <p class="subtitle">A Classroom Remembered</p>
+            <h1>Golden Afternoons</h1>
+            <p class="subtitle">The Restaurant We Used to Visit</p>
         </div>
 
         <div class="controls-hint">
             <p>🖱️ Move mouse to look around</p>
-            <p>🖱️ Click the desk to drink water</p>
+            <p>🖱️ Click the noodles to eat</p>
         </div>
 
-        <div class="atmosphere-text hidden" id="desk-message">
-            <p class="fade-text">The water tastes like summer days...</p>
+        <div class="atmosphere-text hidden" id="noodle-message">
+            <p class="fade-text">The warmth and taste bring back so many memories...</p>
         </div>
     </div>
 
     <!-- Audio Elements -->
-    <audio id="ambient-sound" loop>
-        <source src="ambient.mp3" type="audio/mpeg">
+    <audio id="background-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
     </audio>
-    <audio id="water-sound">
-        <source src="water.mp3" type="audio/mpeg">
+    <audio id="conversation-sound" loop>
+        <source src="conversation.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="eating-sound">
+        <source src="eating.mp3" type="audio/mpeg">
     </audio>
     <audio id="transition-sound">
         <source src="transition.mp3" type="audio/mpeg">
