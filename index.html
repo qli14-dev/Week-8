@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamlike Memory - A Journey Back</title>
+    <title>Family Choice - An Interactive Journey</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,59 +11,111 @@
     <div id="loading-screen">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p>Loading memories...</p>
+            <p>Loading your story...</p>
         </div>
     </div>
 
-    <!-- Letter Introduction Screen -->
-    <div id="letter-screen">
-        <div class="letter-container">
-            <div class="letter-glow"></div>
-            <div class="letter">
-                <div class="letter-content">
-                    <p class="letter-date">September 2015</p>
-                    <p class="letter-text">
-                        "Do you remember those golden afternoons?<br>
-                        When time moved slowly,<br>
-                        and every moment felt infinite...<br><br>
-                        Let me take you back."
-                    </p>
-                    <p class="letter-signature">— A Memory</p>
-                </div>
+    <!-- Intro Screen -->
+    <div id="intro-screen">
+        <div class="intro-container">
+            <div class="intro-glow"></div>
+            <div class="intro-content">
+                <h1 class="intro-title">Family Choice</h1>
+                <p class="intro-text">
+                    The living room feels heavy tonight.<br>
+                    Voices rise, emotions overflow.<br>
+                    You stand at a crossroads...<br><br>
+                    What will you choose?
+                </p>
+                <button class="start-button">Begin Your Journey</button>
             </div>
-            <p class="instruction">Click the letter to remember</p>
         </div>
     </div>
 
     <!-- 3D Scene Canvas -->
     <canvas id="scene-canvas"></canvas>
 
-    <!-- UI Overlay -->
-    <div id="ui-overlay" class="hidden">
-        <div class="memory-title">
-            <h1>Summer of '15</h1>
-            <p class="subtitle">A Classroom Remembered</p>
+    <!-- Choice Overlay -->
+    <div id="choice-overlay" class="hidden">
+        <div class="choice-container">
+            <h2 class="choice-title">What do you choose?</h2>
+            <div class="choices">
+                <button class="choice-button communicate" id="btn-communicate">
+                    <div class="choice-icon">💬</div>
+                    <div class="choice-text">
+                        <h3>Communicate</h3>
+                        <p>Stay and talk it through</p>
+                    </div>
+                </button>
+                <button class="choice-button leave" id="btn-leave">
+                    <div class="choice-icon">🚶</div>
+                    <div class="choice-text">
+                        <h3>Leave</h3>
+                        <p>Walk away into the night</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scene UI Overlays -->
+    <div id="scene-ui" class="hidden">
+        <!-- Argument Scene UI -->
+        <div id="argument-ui" class="scene-ui-content hidden">
+            <div class="atmosphere-text">
+                <p class="tension-text">The air feels thick with unspoken words...</p>
+            </div>
+            <div class="controls-hint">
+                <p>🖱️ Move mouse to look around</p>
+                <p>🖱️ Click objects to interact</p>
+            </div>
         </div>
 
-        <div class="controls-hint">
-            <p>🖱️ Move mouse to look around</p>
-            <p>🖱️ Click the desk to drink water</p>
+        <!-- Communicate Scene UI -->
+        <div id="communicate-ui" class="scene-ui-content hidden">
+            <div class="scene-title warm">
+                <h2>Reconciliation</h2>
+                <p>Understanding finds its way home</p>
+            </div>
+            <div id="dialogue-bubbles" class="dialogue-container"></div>
         </div>
 
-        <div class="atmosphere-text hidden" id="desk-message">
-            <p class="fade-text">The water tastes like summer days...</p>
+        <!-- Leave Scene UI -->
+        <div id="leave-ui" class="scene-ui-content hidden">
+            <div class="scene-title cold">
+                <h2>Into the Unknown</h2>
+                <p>A lonely path stretches before you</p>
+            </div>
+            <div class="memory-fragments hidden" id="memory-text">
+                <p class="fragment-text"></p>
+            </div>
         </div>
     </div>
 
     <!-- Audio Elements -->
-    <audio id="ambient-sound" loop>
-        <source src="ambient.mp3" type="audio/mpeg">
+    <audio id="ambient-argument" loop>
+        <!-- Heavy, tense ambient sound -->
     </audio>
-    <audio id="water-sound">
-        <source src="water.mp3" type="audio/mpeg">
+    <audio id="ambient-home" loop>
+        <!-- Warm home ambience -->
+    </audio>
+    <audio id="ambient-city" loop>
+        <!-- Cold city night sounds -->
+    </audio>
+    <audio id="piano-sound">
+        <!-- Soft piano notes -->
+    </audio>
+    <audio id="chime-sound">
+        <!-- Light chimes -->
+    </audio>
+    <audio id="footstep-sound">
+        <!-- Echoing footsteps -->
+    </audio>
+    <audio id="wind-sound" loop>
+        <!-- Cold wind -->
     </audio>
     <audio id="transition-sound">
-        <source src="transition.mp3" type="audio/mpeg">
+        <!-- Scene transition -->
     </audio>
 
     <!-- Three.js Library -->
