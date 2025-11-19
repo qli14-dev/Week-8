@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Choice - Interactive Narrative</title>
+    <link rel="stylesheet" href="family-conflict.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Introduction Screen -->
+    <div id="intro-screen">
+        <div class="intro-container">
+            <h1 class="intro-title">Family Choice</h1>
+            <p class="intro-subtitle">An Interactive Narrative</p>
+            <p class="intro-text">
+                Tonight, everything feels heavy.<br>
+                The air is thick with tension.<br>
+                What will you choose?
+            </p>
+            <button id="start-btn" class="start-button">Begin</button>
+        </div>
+    </div>
+
+    <!-- 3D Scene Canvas -->
+    <canvas id="scene-canvas"></canvas>
+
+    <!-- Choice Buttons Overlay -->
+    <div id="choice-overlay" class="hidden">
+        <div class="choice-container">
+            <h2 class="choice-title">What will you do?</h2>
+            <div class="choices">
+                <button id="communicate-btn" class="choice-btn communicate">
+                    <span class="choice-icon">💬</span>
+                    <span class="choice-text">Communicate</span>
+                    <span class="choice-desc">Stay and talk it through</span>
+                </button>
+                <button id="runaway-btn" class="choice-btn runaway">
+                    <span class="choice-icon">🚶</span>
+                    <span class="choice-text">Run Away</span>
+                    <span class="choice-desc">Leave and find your own path</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialogue Bubbles Container -->
+    <div id="dialogue-container" class="hidden"></div>
+
+    <!-- UI Controls Hint -->
+    <div id="controls-hint" class="hidden">
+        <p>🖱️ Drag to rotate camera • Scroll to zoom • Click objects to interact</p>
+    </div>
+
+    <!-- Scene Title Display -->
+    <div id="scene-title" class="hidden">
+        <h2 id="title-text"></h2>
+        <p id="subtitle-text"></p>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="ambient-argument" loop>
+        <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+    <audio id="ambient-peaceful" loop>
+        <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+    <audio id="ambient-city" loop>
+        <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+    <audio id="transition-sound">
+        <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- OrbitControls for camera control -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Main Application Script -->
+    <script src="family-conflict.js"></script>
+</body>
+</html>
