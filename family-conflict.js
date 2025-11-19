@@ -9,6 +9,9 @@ let livingRoom, parents, interactiveObjects;
 let clock, currentPath = null, isSceneActive = false;
 let mouseX = 0, mouseY = 0;
 let targetCameraX = 0, targetCameraY = 0, targetCameraZ = 5;
+let dustParticles, cityFog, playerCharacter;
+let isDragging = false, dragStartX = 0, cameraRotationAngle = 0;
+let audioContext, sounds = {};
 
 // Scene state
 let sceneState = {
@@ -621,6 +624,7 @@ function setupEventListeners() {
     const enterButton = document.querySelector('.enter-button');
     enterButton.addEventListener('click', () => {
         enterScene();
+        initAudio();
     });
 
     // Mouse movement for camera control
@@ -628,6 +632,27 @@ function setupEventListeners() {
 
     // Click detection for interactive objects
     window.addEventListener('click', onMouseClick);
+
+    // Mouse drag for camera rotation
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseDrag);
+
+    // Touch events for mobile
+    window.addEventListener('touchstart', (e) => {
+        if (sceneState.phase === 'runaway') {
+            isDragging = true;
+            dragStartX = e.touches[0].clientX;
+        }
+    });
+    window.addEventListener('touchend', () => isDragging = false);
+    window.addEventListener('touchmove', (e) => {
+        if (isDragging && sceneState.phase === 'runaway') {
+            const deltaX = e.touches[0].clientX - dragStartX;
+            cameraRotationAngle += deltaX * 0.005;
+            dragStartX = e.touches[0].clientX;
+        }
+    });
 
     // Choice buttons
     document.getElementById('communicate-btn').addEventListener('click', () => {
@@ -653,7 +678,7 @@ function onMouseMove(event) {
 }
 
 function onMouseClick(event) {
-    if (!isSceneActive || sceneState.choiceMade) return;
+    if (!isSceneActive) return;
 
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -678,11 +703,52 @@ function onMouseClick(event) {
     }
 }
 
+function onMouseDown(event) {
+    if (sceneState.phase === 'runaway') {
+        isDragging = true;
+        dragStartX = event.clientX;
+    }
+}
+
+function onMouseUp(event) {
+    isDragging = false;
+}
+
+function onMouseDrag(event) {
+    if (isDragging && sceneState.phase === 'runaway') {
+        const deltaX = event.clientX - dragStartX;
+        cameraRotationAngle += deltaX * 0.005;
+        dragStartX = event.clientX;
+    }
+}
+
 function handleObjectClick(object) {
     const atmosphereMessage = document.getElementById('atmosphere-message');
     const messageText = atmosphereMessage.querySelector('.fade-text');
 
     let message = '';
+
+    // Handle neon sign clicks in city scene
+    if (object.name && object.name.includes('neon')) {
+        const neonLight = object.userData.neonLight;
+        const originalIntensity = object.userData.originalIntensity;
+
+        // Flicker effect
+        let flickerCount = 0;
+        const flickerInterval = setInterval(() => {
+            flickerCount++;
+            neonLight.intensity = flickerCount % 2 === 0 ? originalIntensity : 0.2;
+            object.material.opacity = flickerCount % 2 === 0 ? 0.7 : 0.2;
+
+            if (flickerCount >= 8) {
+                clearInterval(flickerInterval);
+                neonLight.intensity = originalIntensity;
+                object.material.opacity = 0.7;
+            }
+        }, 100);
+
+        return;
+    }
 
     if (object.name.includes('photo')) {
         message = `"${object.userData.memoryText}... when things were simpler."`;
@@ -714,6 +780,58 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ===================================
+// AUDIO SYSTEM
+// ===================================
+
+function initAudio() {
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('Audio system initialized');
+    } catch (e) {
+        console.log('Web Audio API not supported');
+    }
+}
+
+function playSound(type) {
+    if (!audioContext) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Different sounds for different interactions
+    switch(type) {
+        case 'piano':
+            oscillator.frequency.value = 261.63; // Middle C
+            gainNode.gain.value = 0.3;
+            break;
+        case 'chime':
+            oscillator.frequency.value = 523.25; // High C
+            gainNode.gain.value = 0.2;
+            oscillator.type = 'sine';
+            break;
+        case 'footstep':
+            oscillator.frequency.value = 80;
+            gainNode.gain.value = 0.15;
+            oscillator.type = 'square';
+            break;
+        case 'glow':
+            oscillator.frequency.value = 440;
+            gainNode.gain.value = 0.1;
+            oscillator.type = 'sine';
+            break;
+    }
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+
+    // Fade out
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
 }
 
 // ===================================
@@ -822,109 +940,240 @@ function choosePathCommunicate() {
 }
 
 function transitionToCommunicate() {
-    // Gradually brighten the scene
+    // Play soft piano sound
+    playSound('piano');
+
+    // Gradually brighten the scene to warm golden sunlight
     const overheadLight = scene.userData.overheadLight;
     const windowLight = scene.userData.windowLight;
     const tensionLight = scene.userData.tensionLight;
     const windowGlass = scene.userData.windowGlass;
 
+    // Create dust particles floating in sunlight
+    createDustParticles();
+
     // Animate lighting change
     let progress = 0;
     const lightTransition = setInterval(() => {
-        progress += 0.01;
+        progress += 0.008;
 
         if (progress >= 1) {
             progress = 1;
             clearInterval(lightTransition);
-            showDialogueBubbles();
+            // Show dialogue bubbles after transition
+            setTimeout(() => showReassuringDialogueBubbles(), 1000);
         }
 
-        // Brighten lights
-        overheadLight.intensity = 0.8 + progress * 0.7;
+        // Brighten lights to golden sunshine
+        overheadLight.intensity = 0.8 + progress * 1.2;
         overheadLight.color.setHex(lerpColor(0xffa500, 0xffd89b, progress));
 
-        windowLight.intensity = 0.4 + progress * 0.8;
-        windowLight.color.setHex(lerpColor(0x4a6fa5, 0x87ceeb, progress));
+        // Strong golden window light (like afternoon sun)
+        windowLight.intensity = 0.4 + progress * 1.5;
+        windowLight.color.setHex(lerpColor(0x4a6fa5, 0xffd89b, progress));
 
-        // Reduce tension light
+        // Reduce tension light completely
         tensionLight.intensity = 0.5 * (1 - progress);
 
-        // Clear storm from window
+        // Clear storm - show sunny blue sky
         windowGlass.material.color.setHex(lerpColor(0x2c4a7c, 0x87ceeb, progress));
+        windowGlass.material.opacity = 0.6 - progress * 0.3;
 
-        // Reduce tension particles
+        // Fade out tension particles
         scene.userData.tensionParticles.material.opacity = 0.4 * (1 - progress);
 
-        // Change scene fog
-        scene.fog.color.setHex(lerpColor(0x1a1a2e, 0xffd4a3, progress));
-        scene.background.setHex(lerpColor(0x16213e, 0xffe4c4, progress));
+        // Change scene to warm, hopeful atmosphere
+        scene.fog.color.setHex(lerpColor(0x1a1a2e, 0xfff4e0, progress));
+        scene.background.setHex(lerpColor(0x16213e, 0xffefd5, progress));
+
+        // Update dust particles opacity
+        if (dustParticles) {
+            dustParticles.material.opacity = 0.6 * progress;
+        }
 
     }, 30);
 
-    // Animate parents to calm poses
+    // Animate parents to sit together and reconnect
     animateReconciliation();
+}
+
+function createDustParticles() {
+    const particleCount = 300;
+    const particlesGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = [];
+
+    for (let i = 0; i < particleCount; i++) {
+        // Particles concentrated in sunlight beam area
+        positions[i * 3] = (Math.random() - 0.5) * 8 + 3; // Bias toward window side
+        positions[i * 3 + 1] = Math.random() * 5 + 1;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
+
+        velocities.push({
+            x: (Math.random() - 0.5) * 0.002,
+            y: Math.random() * 0.003 + 0.001, // Slow upward drift
+            z: (Math.random() - 0.5) * 0.002
+        });
+    }
+
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const particlesMaterial = new THREE.PointsMaterial({
+        color: 0xffd89b,
+        size: 0.04,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+    });
+
+    dustParticles = new THREE.Points(particlesGeometry, particlesMaterial);
+    dustParticles.userData.velocities = velocities;
+    scene.add(dustParticles);
+    scene.userData.dustParticles = dustParticles;
 }
 
 function animateReconciliation() {
     const mother = scene.userData.mother;
     const father = scene.userData.father;
 
+    // Move parents to sit together on couch
     let progress = 0;
     const reconcileInterval = setInterval(() => {
-        progress += 0.01;
+        progress += 0.008;
 
         if (progress >= 1) {
             progress = 1;
             clearInterval(reconcileInterval);
+            // Make family members clickable for interactions
+            makeFamilyMembersInteractive();
         }
 
-        // Mother calming down
-        mother.userData.rightArm.rotation.z = lerp(-Math.PI / 6, -Math.PI / 8, progress);
-        mother.userData.leftArm.rotation.z = lerp(Math.PI / 6, Math.PI / 8, progress);
-        mother.userData.head.rotation.y = lerp(mother.userData.head.rotation.y, 0, progress * 0.1);
+        // Mother moving to sit on couch and calming
+        mother.position.x = lerp(-2, -0.8, progress);
+        mother.position.z = lerp(-1, -3.5, progress);
+        mother.rotation.y = lerp(Math.PI / 6, 0, progress);
+        mother.userData.rightArm.rotation.z = lerp(-Math.PI / 6, -Math.PI / 12, progress);
+        mother.userData.leftArm.rotation.z = lerp(Math.PI / 6, Math.PI / 12, progress);
+        mother.userData.head.rotation.y = lerp(mother.userData.head.rotation.y, Math.PI / 8, progress * 0.1);
 
-        // Father calming down
-        father.userData.leftArm.rotation.z = lerp(Math.PI / 6, Math.PI / 8, progress);
-        father.userData.rightArm.rotation.z = lerp(-Math.PI / 6, -Math.PI / 8, progress);
-        father.userData.head.rotation.y = lerp(father.userData.head.rotation.y, 0, progress * 0.1);
+        // Father moving to sit on couch and calming
+        father.position.x = lerp(2, 0.8, progress);
+        father.position.z = lerp(-1, -3.5, progress);
+        father.rotation.y = lerp(-Math.PI / 6, 0, progress);
+        father.userData.leftArm.rotation.z = lerp(Math.PI / 6, Math.PI / 12, progress);
+        father.userData.rightArm.rotation.z = lerp(-Math.PI / 6, -Math.PI / 12, progress);
+        father.userData.head.rotation.y = lerp(father.userData.head.rotation.y, -Math.PI / 8, progress * 0.1);
 
     }, 30);
 
     // Camera circles around the family
     setTimeout(() => {
         startFamilyCircle();
-    }, 2000);
+    }, 3000);
 }
 
-function showDialogueBubbles() {
-    const dialogueContainer = document.getElementById('dialogue-container');
+function makeFamilyMembersInteractive() {
+    const mother = scene.userData.mother;
+    const father = scene.userData.father;
+
+    mother.userData.clickable = true;
+    mother.userData.interactionType = 'mother';
+    mother.name = 'mother';
+
+    father.userData.clickable = true;
+    father.userData.interactionType = 'father';
+    father.name = 'father';
+
+    // Update click handler
+    const originalHandler = handleObjectClick;
+    window.handleObjectClick = function(object) {
+        if (object.userData.interactionType === 'mother') {
+            playSound('chime');
+            // Animate mother nodding
+            const head = object.userData.head;
+            const startRotation = head.rotation.x;
+            let nodProgress = 0;
+            const nodInterval = setInterval(() => {
+                nodProgress += 0.1;
+                if (nodProgress >= 1) {
+                    head.rotation.x = startRotation;
+                    clearInterval(nodInterval);
+                } else {
+                    head.rotation.x = startRotation + Math.sin(nodProgress * Math.PI * 2) * 0.15;
+                }
+            }, 30);
+            showTextBubble("It's okay", '25%', '40%');
+        } else if (object.userData.interactionType === 'father') {
+            playSound('piano');
+            // Animate father reaching out
+            const rightArm = object.userData.rightArm;
+            const startRotation = rightArm.rotation.z;
+            let reachProgress = 0;
+            const reachInterval = setInterval(() => {
+                reachProgress += 0.05;
+                if (reachProgress >= 1) {
+                    clearInterval(reachInterval);
+                    setTimeout(() => {
+                        let returnProgress = 0;
+                        const returnInterval = setInterval(() => {
+                            returnProgress += 0.05;
+                            if (returnProgress >= 1) {
+                                rightArm.rotation.z = startRotation;
+                                clearInterval(returnInterval);
+                            } else {
+                                rightArm.rotation.z = lerp(-Math.PI / 3, startRotation, returnProgress);
+                            }
+                        }, 30);
+                    }, 500);
+                } else {
+                    rightArm.rotation.z = lerp(startRotation, -Math.PI / 3, reachProgress);
+                }
+            }, 30);
+            showTextBubble("We're here", '65%', '45%');
+        } else {
+            originalHandler(object);
+        }
+    };
+}
+
+function showReassuringDialogueBubbles() {
+    playSound('glow');
 
     const dialogues = [
-        { text: "I'm sorry... I didn't mean to raise my voice.", x: '20%', y: '35%', delay: 0 },
-        { text: "I know. I'm sorry too. Let's talk.", x: '65%', y: '40%', delay: 1500 },
-        { text: "We can work through this together.", x: '42%', y: '60%', delay: 3000 }
+        { text: "I'm sorry... I didn't mean to hurt you.", x: '20%', y: '35%', delay: 0 },
+        { text: "I know. I'm sorry too.", x: '65%', y: '40%', delay: 2000 },
+        { text: "Let's talk about this together.", x: '42%', y: '58%', delay: 4000 },
+        { text: "We can work through anything.", x: '35%', y: '30%', delay: 6500 }
     ];
 
     dialogues.forEach(dialogue => {
         setTimeout(() => {
-            const bubble = document.createElement('div');
-            bubble.className = 'dialogue-bubble';
-            bubble.textContent = dialogue.text;
-            bubble.style.left = dialogue.x;
-            bubble.style.top = dialogue.y;
-            dialogueContainer.appendChild(bubble);
-
-            setTimeout(() => {
-                bubble.classList.add('visible');
-            }, 100);
-
-            // Remove after some time
-            setTimeout(() => {
-                bubble.classList.remove('visible');
-                setTimeout(() => bubble.remove(), 1000);
-            }, 4000);
+            playSound('chime');
+            showTextBubble(dialogue.text, dialogue.x, dialogue.y);
         }, dialogue.delay);
     });
+}
+
+function showTextBubble(text, x, y, duration = 4000) {
+    const dialogueContainer = document.getElementById('dialogue-container');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'dialogue-bubble';
+    bubble.textContent = text;
+    bubble.style.left = x;
+    bubble.style.top = y;
+    dialogueContainer.appendChild(bubble);
+
+    setTimeout(() => {
+        bubble.classList.add('visible');
+    }, 100);
+
+    // Remove after duration
+    setTimeout(() => {
+        bubble.classList.remove('visible');
+        setTimeout(() => bubble.remove(), 1000);
+    }, duration);
 }
 
 function startFamilyCircle() {
@@ -1016,58 +1265,273 @@ function createStreetScene() {
     scene.remove(parents);
     scene.remove(interactiveObjects);
 
-    // Change scene atmosphere
-    scene.fog = new THREE.Fog(0x0a0a1a, 5, 30);
-    scene.background = new THREE.Color(0x0a0a1a);
+    // Change scene to dark futuristic city atmosphere
+    scene.fog = new THREE.Fog(0x0a0a1a, 10, 80);
+    scene.background = new THREE.Color(0x05050f);
 
-    // Create street ground
-    const streetGeometry = new THREE.PlaneGeometry(10, 100);
+    // Create large city ground/street
+    const streetGeometry = new THREE.PlaneGeometry(100, 200);
     const streetMaterial = new THREE.MeshStandardMaterial({
-        color: 0x1a1a2a,
-        roughness: 0.9,
-        metalness: 0.2
+        color: 0x0f0f1a,
+        roughness: 0.8,
+        metalness: 0.3
     });
     const street = new THREE.Mesh(streetGeometry, streetMaterial);
     street.rotation.x = -Math.PI / 2;
     street.receiveShadow = true;
     scene.add(street);
 
-    // Create neon lights
+    // Create tall skyscrapers
+    createSkyscrapers();
+
+    // Create dynamic fog
+    createCityFog();
+
+    // Create player character standing alone
+    createPlayerCharacter();
+
+    // Create neon lights and signs
     createNeonLights();
 
-    // Create memory puddles
+    // Create memory puddles on wet pavement
     createMemoryPuddles();
 
-    // Start walking animation
-    startWalkingSequence();
+    // Add ambient city lighting
+    addCityLighting();
 
     // Show memory fragments
-    showMemoryFragments();
+    setTimeout(() => showMemoryFragments(), 2000);
+
+    // Enable camera rotation
+    enableCameraRotation();
+}
+
+function createSkyscrapers() {
+    const buildingData = [
+        // Left side buildings
+        { x: -25, z: -40, width: 15, height: 60, depth: 15, color: 0x1a1a2e },
+        { x: -30, z: -70, width: 12, height: 80, depth: 12, color: 0x15151f },
+        { x: -20, z: -100, width: 18, height: 70, depth: 18, color: 0x1a1a28 },
+        { x: -35, z: -130, width: 14, height: 90, depth: 14, color: 0x12121a },
+
+        // Right side buildings
+        { x: 25, z: -35, width: 14, height: 55, depth: 14, color: 0x1a1a2e },
+        { x: 32, z: -65, width: 16, height: 75, depth: 16, color: 0x15151f },
+        { x: 28, z: -95, width: 13, height: 85, depth: 13, color: 0x1a1a28 },
+        { x: 38, z: -125, width: 15, height: 95, depth: 15, color: 0x12121a },
+
+        // Far distance buildings
+        { x: -15, z: -150, width: 20, height: 100, depth: 20, color: 0x0f0f15 },
+        { x: 15, z: -160, width: 22, height: 110, depth: 22, color: 0x0f0f15 },
+        { x: 0, z: -180, width: 25, height: 120, depth: 25, color: 0x0a0a10 }
+    ];
+
+    buildingData.forEach(building => {
+        const geometry = new THREE.BoxGeometry(building.width, building.height, building.depth);
+        const material = new THREE.MeshStandardMaterial({
+            color: building.color,
+            roughness: 0.8,
+            metalness: 0.2,
+            emissive: building.color,
+            emissiveIntensity: 0.1
+        });
+        const skyscraper = new THREE.Mesh(geometry, material);
+        skyscraper.position.set(building.x, building.height / 2, building.z);
+        skyscraper.castShadow = true;
+        skyscraper.receiveShadow = true;
+
+        // Add window lights to buildings
+        addBuildingWindows(skyscraper, building);
+
+        scene.add(skyscraper);
+    });
+}
+
+function addBuildingWindows(building, data) {
+    const windowsPerFloor = Math.floor(data.width / 2);
+    const floors = Math.floor(data.height / 3);
+
+    for (let floor = 0; floor < floors; floor++) {
+        for (let window = 0; window < windowsPerFloor; window++) {
+            // Randomly lit windows
+            if (Math.random() > 0.6) {
+                const windowLight = new THREE.PointLight(0xffffaa, 0.3, 5);
+                const xOffset = (window - windowsPerFloor / 2) * 2;
+                const yOffset = (floor - floors / 2) * 3;
+                windowLight.position.set(
+                    data.x + xOffset,
+                    data.height / 2 + yOffset,
+                    data.z
+                );
+                scene.add(windowLight);
+            }
+        }
+    }
+}
+
+function createCityFog() {
+    const fogParticles = new THREE.Group();
+    const particleCount = 500;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = [];
+
+    for (let i = 0; i < particleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 150;
+        positions[i * 3 + 1] = Math.random() * 30 + 5;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 200 - 50;
+
+        velocities.push({
+            x: (Math.random() - 0.5) * 0.01,
+            y: (Math.random() - 0.5) * 0.005,
+            z: Math.random() * 0.02
+        });
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.PointsMaterial({
+        color: 0x4a5a7a,
+        size: 2.0,
+        transparent: true,
+        opacity: 0.15,
+        blending: THREE.AdditiveBlending
+    });
+
+    cityFog = new THREE.Points(geometry, material);
+    cityFog.userData.velocities = velocities;
+    scene.add(cityFog);
+    scene.userData.cityFog = cityFog;
+}
+
+function createPlayerCharacter() {
+    playerCharacter = new THREE.Group();
+    playerCharacter.name = 'player';
+
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0x2a3a5a,
+        roughness: 0.8
+    });
+
+    // Body
+    const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.3, 1.2, 8),
+        bodyMaterial
+    );
+    body.position.y = 0.6;
+    playerCharacter.add(body);
+
+    // Head
+    const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.25, 16, 16),
+        bodyMaterial
+    );
+    head.position.y = 1.4;
+    playerCharacter.add(head);
+
+    // Backpack
+    const backpack = new THREE.Mesh(
+        new THREE.BoxGeometry(0.4, 0.5, 0.25),
+        new THREE.MeshStandardMaterial({ color: 0x3a4a6a, roughness: 0.9 })
+    );
+    backpack.position.set(0, 0.8, -0.25);
+    playerCharacter.add(backpack);
+
+    // Arms
+    const armGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.8, 8);
+    const leftArm = new THREE.Mesh(armGeometry, bodyMaterial);
+    leftArm.position.set(-0.4, 0.6, 0);
+    leftArm.rotation.z = Math.PI / 12;
+    playerCharacter.add(leftArm);
+
+    const rightArm = new THREE.Mesh(armGeometry, bodyMaterial);
+    rightArm.position.set(0.4, 0.6, 0);
+    rightArm.rotation.z = -Math.PI / 12;
+    playerCharacter.add(rightArm);
+
+    // Legs
+    const legGeometry = new THREE.CylinderGeometry(0.12, 0.12, 1.0, 8);
+    const leftLeg = new THREE.Mesh(legGeometry, bodyMaterial);
+    leftLeg.position.set(-0.18, -0.3, 0);
+    playerCharacter.add(leftLeg);
+
+    const rightLeg = new THREE.Mesh(legGeometry, bodyMaterial);
+    rightLeg.position.set(0.18, -0.3, 0);
+    playerCharacter.add(rightLeg);
+
+    playerCharacter.position.set(0, 0, 0);
+    playerCharacter.userData.leftLeg = leftLeg;
+    playerCharacter.userData.rightLeg = rightLeg;
+
+    scene.add(playerCharacter);
+    scene.userData.playerCharacter = playerCharacter;
 }
 
 function createNeonLights() {
-    const neonPositions = [
-        { x: -4, y: 4, z: -10, color: 0xff0080 },
-        { x: 4, y: 3.5, z: -20, color: 0x00ffff },
-        { x: -3, y: 4.5, z: -30, color: 0xff6600 },
-        { x: 3.5, y: 4, z: -40, color: 0x00ff00 }
+    const neonSigns = [
+        // Close neon signs
+        { x: -8, y: 6, z: -15, width: 3, height: 0.8, color: 0xff0080, text: 'HOTEL' },
+        { x: 8, y: 5, z: -12, width: 2.5, height: 0.7, color: 0x00ffff, text: 'BAR' },
+        { x: -6, y: 7, z: -25, width: 4, height: 1, color: 0xff6600, text: 'DINER' },
+        { x: 10, y: 8, z: -30, width: 3.5, height: 0.9, color: 0x00ff00, text: 'TAXI' },
+
+        // Distant neon signs
+        { x: -12, y: 12, z: -50, width: 5, height: 1.5, color: 0xff0099, text: '' },
+        { x: 15, y: 10, z: -55, width: 4, height: 1.2, color: 0x00ccff, text: '' },
+        { x: -18, y: 15, z: -80, width: 6, height: 2, color: 0xff3300, text: '' },
+        { x: 20, y: 14, z: -75, width: 5.5, height: 1.8, color: 0x66ff00, text: '' }
     ];
 
-    neonPositions.forEach(pos => {
-        const neonLight = new THREE.PointLight(pos.color, 0.8, 15);
-        neonLight.position.set(pos.x, pos.y, pos.z);
+    neonSigns.forEach((sign, index) => {
+        // Neon light
+        const neonLight = new THREE.PointLight(sign.color, 1.2, 20);
+        neonLight.position.set(sign.x, sign.y, sign.z);
         scene.add(neonLight);
 
-        // Neon glow mesh
-        const glowGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-        const glowMaterial = new THREE.MeshBasicMaterial({
-            color: pos.color,
+        // Neon sign mesh (clickable)
+        const signGeometry = new THREE.BoxGeometry(sign.width, sign.height, 0.1);
+        const signMaterial = new THREE.MeshBasicMaterial({
+            color: sign.color,
             transparent: true,
-            opacity: 0.6
+            opacity: 0.7
         });
-        const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-        glow.position.copy(neonLight.position);
-        scene.add(glow);
+        const signMesh = new THREE.Mesh(signGeometry, signMaterial);
+        signMesh.position.set(sign.x, sign.y, sign.z);
+        signMesh.userData.clickable = true;
+        signMesh.userData.neonLight = neonLight;
+        signMesh.userData.originalIntensity = 1.2;
+        signMesh.userData.flickerIndex = index;
+        signMesh.name = `neon${index}`;
+        scene.add(signMesh);
+
+        // Add random flickering
+        scene.userData[`neon${index}`] = { light: neonLight, mesh: signMesh };
+    });
+}
+
+function addCityLighting() {
+    // Dim ambient light
+    const cityAmbient = new THREE.AmbientLight(0x2a3a5a, 0.2);
+    scene.add(cityAmbient);
+
+    // Distant city glow
+    const cityGlow = new THREE.HemisphereLight(0x4a5a7a, 0x0a0a1a, 0.3);
+    scene.add(cityGlow);
+
+    // Street lights
+    const streetLightPositions = [
+        { x: -5, z: -5 },
+        { x: 5, z: -5 },
+        { x: -5, z: -20 },
+        { x: 5, z: -20 },
+        { x: -5, z: -40 },
+        { x: 5, z: -40 }
+    ];
+
+    streetLightPositions.forEach(pos => {
+        const streetLight = new THREE.PointLight(0xffffaa, 0.5, 12);
+        streetLight.position.set(pos.x, 4, pos.z);
+        scene.add(streetLight);
     });
 }
 
@@ -1097,30 +1561,12 @@ function createMemoryPuddles() {
     });
 }
 
-function startWalkingSequence() {
-    // Move camera forward
-    const startZ = camera.position.z;
-    const startTime = Date.now();
-    const duration = 15000; // 15 seconds
-
-    function walk() {
-        if (sceneState.phase !== 'runaway') return;
-
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Move forward
-        targetCameraZ = startZ - progress * 40;
-
-        // Slight bobbing motion
-        camera.position.y = 1.6 + Math.sin(elapsed * 0.005) * 0.05;
-
-        if (progress < 1) {
-            requestAnimationFrame(walk);
-        }
-    }
-
-    walk();
+function enableCameraRotation() {
+    // Position camera behind and above player character
+    targetCameraX = 0;
+    targetCameraY = 2.5;
+    targetCameraZ = 5;
+    cameraRotationAngle = 0;
 }
 
 function showMemoryFragments() {
@@ -1128,15 +1574,17 @@ function showMemoryFragments() {
     fragmentsContainer.classList.remove('hidden');
 
     const memories = [
-        { text: '"Remember when we used to laugh together?"', delay: 2000 },
-        { text: '"Family dinners every Sunday..."', delay: 5000 },
-        { text: '"They said they were proud of me once."', delay: 8000 },
-        { text: '"Will they even notice I\'m gone?"', delay: 11000 },
-        { text: '"The city lights look like stars from here."', delay: 14000 }
+        { text: '"Remember when we used to laugh together?"', delay: 1000 },
+        { text: '"Family dinners every Sunday..."', delay: 4000 },
+        { text: '"They said they were proud of me once."', delay: 7000 },
+        { text: '"Will they even notice I\'m gone?"', delay: 10000 },
+        { text: '"The city lights look like stars from here."', delay: 13000 },
+        { text: '"Maybe I can find myself out here..."', delay: 16000 }
     ];
 
     memories.forEach(memory => {
         setTimeout(() => {
+            playSound('glow');
             const fragment = document.createElement('div');
             fragment.className = 'memory-fragment';
             fragment.textContent = memory.text;
@@ -1151,7 +1599,7 @@ function showMemoryFragments() {
             // Remove after animation
             setTimeout(() => {
                 fragment.remove();
-            }, 3000);
+            }, 3500);
         }, memory.delay);
     });
 }
@@ -1166,13 +1614,87 @@ function animate() {
     const elapsedTime = clock.getElapsedTime();
 
     if (isSceneActive) {
-        // Smooth camera movement
-        camera.position.x += (targetCameraX - camera.position.x) * CAMERA_MOVE_SPEED;
-        camera.position.y += (1.6 + targetCameraY - camera.position.y) * CAMERA_MOVE_SPEED;
-        camera.position.z += (targetCameraZ - camera.position.z) * CAMERA_MOVE_SPEED;
+        // Smooth camera movement based on path
+        if (sceneState.phase === 'runaway') {
+            // Rotate camera around player character
+            const radius = 5;
+            const cameraX = Math.sin(cameraRotationAngle) * radius;
+            const cameraZ = Math.cos(cameraRotationAngle) * radius + playerCharacter.position.z;
 
-        if (sceneState.phase !== 'runaway') {
+            camera.position.x += (cameraX - camera.position.x) * CAMERA_MOVE_SPEED;
+            camera.position.y += (2.5 - camera.position.y) * CAMERA_MOVE_SPEED;
+            camera.position.z += (cameraZ - camera.position.z) * CAMERA_MOVE_SPEED;
+            camera.lookAt(playerCharacter.position.x, 1.5, playerCharacter.position.z);
+
+            // Animate player character walking
+            if (playerCharacter) {
+                const walkCycle = Math.sin(elapsedTime * 2);
+                playerCharacter.userData.leftLeg.rotation.x = walkCycle * 0.3;
+                playerCharacter.userData.rightLeg.rotation.x = -walkCycle * 0.3;
+            }
+
+            // Animate city fog
+            if (cityFog) {
+                const positions = cityFog.geometry.attributes.position.array;
+                const velocities = cityFog.userData.velocities;
+
+                for (let i = 0; i < positions.length / 3; i++) {
+                    positions[i * 3] += velocities[i].x;
+                    positions[i * 3 + 1] += velocities[i].y;
+                    positions[i * 3 + 2] += velocities[i].z;
+
+                    // Wrap fog particles
+                    if (positions[i * 3] > 75) positions[i * 3] = -75;
+                    if (positions[i * 3] < -75) positions[i * 3] = 75;
+                    if (positions[i * 3 + 1] > 35) positions[i * 3 + 1] = 5;
+                    if (positions[i * 3 + 1] < 5) positions[i * 3 + 1] = 35;
+                }
+
+                cityFog.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Random neon light flickering
+            if (Math.random() > 0.98) {
+                const neonIndex = Math.floor(Math.random() * 8);
+                const neonData = scene.userData[`neon${neonIndex}`];
+                if (neonData) {
+                    const flickerDuration = 200;
+                    neonData.light.intensity = 0.3;
+                    neonData.mesh.material.opacity = 0.3;
+                    setTimeout(() => {
+                        neonData.light.intensity = neonData.mesh.userData.originalIntensity;
+                        neonData.mesh.material.opacity = 0.7;
+                    }, flickerDuration);
+                }
+            }
+        } else {
+            // Normal camera movement for argument and communicate paths
+            camera.position.x += (targetCameraX - camera.position.x) * CAMERA_MOVE_SPEED;
+            camera.position.y += (1.6 + targetCameraY - camera.position.y) * CAMERA_MOVE_SPEED;
+            camera.position.z += (targetCameraZ - camera.position.z) * CAMERA_MOVE_SPEED;
             camera.lookAt(0, 1.5, 0);
+        }
+
+        // Animate dust particles in COMMUNICATE path
+        if (dustParticles && sceneState.phase === 'communicate') {
+            const positions = dustParticles.geometry.attributes.position.array;
+            const velocities = dustParticles.userData.velocities;
+
+            for (let i = 0; i < positions.length / 3; i++) {
+                positions[i * 3] += velocities[i].x;
+                positions[i * 3 + 1] += velocities[i].y + Math.sin(elapsedTime + i * 0.1) * 0.001;
+                positions[i * 3 + 2] += velocities[i].z;
+
+                // Wrap dust particles in sunlight area
+                if (positions[i * 3] > 7) positions[i * 3] = -1;
+                if (positions[i * 3] < -1) positions[i * 3] = 7;
+                if (positions[i * 3 + 1] > 6) positions[i * 3 + 1] = 1;
+                if (positions[i * 3 + 1] < 1) positions[i * 3 + 1] = 6;
+                if (positions[i * 3 + 2] > 4) positions[i * 3 + 2] = -4;
+                if (positions[i * 3 + 2] < -4) positions[i * 3 + 2] = 4;
+            }
+
+            dustParticles.geometry.attributes.position.needsUpdate = true;
         }
 
         // Tension effects during argument
