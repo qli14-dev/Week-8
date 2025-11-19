@@ -29,8 +29,14 @@ const MOUSE_SENSITIVITY = 0.0005;
 // ===================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    init();
-    setupEventListeners();
+    console.log('DOM Content Loaded!');
+    try {
+        init();
+        setupEventListeners();
+        console.log('Initialization complete!');
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
 });
 
 function init() {
@@ -622,7 +628,13 @@ function createTensionParticles() {
 function setupEventListeners() {
     // Enter button
     const enterButton = document.querySelector('.enter-button');
+    if (!enterButton) {
+        console.error('Enter button not found!');
+        return;
+    }
+    console.log('Enter button found, adding click listener');
     enterButton.addEventListener('click', () => {
+        console.log('Enter button clicked!');
         enterScene();
         initAudio();
     });
@@ -839,9 +851,12 @@ function playSound(type) {
 // ===================================
 
 function enterScene() {
+    console.log('enterScene called!');
     const introScreen = document.getElementById('intro-screen');
     const canvas = document.getElementById('scene-canvas');
     const uiOverlay = document.getElementById('ui-overlay');
+
+    console.log('Elements found:', { introScreen, canvas, uiOverlay });
 
     // Fade out intro screen
     introScreen.classList.add('hidden');
