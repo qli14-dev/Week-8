@@ -191,9 +191,9 @@ function createArgumentScene() {
     // Clear existing scene
     clearScene();
 
-    // Set dark, tense atmosphere
-    scene.background = new THREE.Color(0x2a2a3e);
-    scene.fog = new THREE.Fog(0x2a2a3e, 10, 30);
+    // Set dark, tense atmosphere (lightened for visibility)
+    scene.background = new THREE.Color(0x3a3a4e);
+    scene.fog = new THREE.Fog(0x3a3a4e, 15, 40);
 
     // Create living room
     livingRoom = new THREE.Group();
@@ -263,21 +263,26 @@ function createArgumentScene() {
 function createCoffeeTable() {
     const table = new THREE.Group();
 
-    // Table top
+    // Table top - Made brighter and more visible
     const tableTop = new THREE.Mesh(
         new THREE.BoxGeometry(2, 0.08, 1.2),
         new THREE.MeshStandardMaterial({
-            color: 0x5c4033,
-            roughness: 0.6
+            color: 0x8b6f47,
+            roughness: 0.6,
+            metalness: 0.2
         })
     );
     tableTop.position.y = 0.6;
     tableTop.castShadow = true;
+    tableTop.receiveShadow = true;
     table.add(tableTop);
 
-    // Table legs
+    // Table legs - Made brighter
     const legGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.6);
-    const legMaterial = new THREE.MeshStandardMaterial({ color: 0x4a3728 });
+    const legMaterial = new THREE.MeshStandardMaterial({
+        color: 0x6b5742,
+        roughness: 0.7
+    });
     const legPositions = [[-0.8, 0.3, -0.5], [0.8, 0.3, -0.5], [-0.8, 0.3, 0.5], [0.8, 0.3, 0.5]];
 
     legPositions.forEach(pos => {
@@ -286,36 +291,49 @@ function createCoffeeTable() {
         table.add(leg);
     });
 
-    // Cup on table (trembling)
+    // Cup on table (trembling) - Made bigger and brighter
     const cup = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.08, 0.06, 0.15, 16),
+        new THREE.CylinderGeometry(0.12, 0.10, 0.20, 16),
         new THREE.MeshStandardMaterial({
-            color: 0x8b7355,
-            roughness: 0.4
+            color: 0xaa9977,
+            roughness: 0.4,
+            metalness: 0.3,
+            emissive: 0x332211,
+            emissiveIntensity: 0.2
         })
     );
-    cup.position.set(-0.3, 0.72, 0.2);
+    cup.position.set(-0.4, 0.74, 0.2);
     cup.castShadow = true;
     cup.userData.tremble = true;
     cup.userData.clickable = true;
     table.add(cup);
     interactiveObjects.push(cup);
 
-    // Photo frame (clickable)
+    // Photo frame (clickable) - Made bigger and more visible
     const frame = new THREE.Mesh(
-        new THREE.BoxGeometry(0.25, 0.35, 0.02),
+        new THREE.BoxGeometry(0.35, 0.45, 0.03),
         new THREE.MeshStandardMaterial({
-            color: 0x333333,
-            roughness: 0.5
+            color: 0x555555,
+            roughness: 0.5,
+            metalness: 0.4
         })
     );
-    frame.position.set(0.4, 0.72, -0.3);
+    frame.position.set(0.5, 0.76, -0.2);
     frame.rotation.y = -0.3;
     frame.castShadow = true;
     frame.userData.clickable = true;
     frame.userData.type = 'photo';
     table.add(frame);
     interactiveObjects.push(frame);
+
+    // Add a small glowing indicator to show these are interactive
+    const cupGlow = new THREE.PointLight(0xffaa66, 0.3, 1);
+    cupGlow.position.set(-0.4, 0.9, 0.2);
+    table.add(cupGlow);
+
+    const frameGlow = new THREE.PointLight(0xaaaaff, 0.3, 1);
+    frameGlow.position.set(0.5, 0.9, -0.2);
+    table.add(frameGlow);
 
     table.position.set(0, 0, 2.5);
     table.userData.table = tableTop;
@@ -355,24 +373,31 @@ function createStormWindow() {
 }
 
 function createArgumentLighting() {
-    // Dim ambient light
-    const ambientLight = new THREE.AmbientLight(0x3d3d5c, 0.3);
+    // Brighter ambient light so objects are visible
+    const ambientLight = new THREE.AmbientLight(0x5d5d7c, 0.6);
     scene.add(ambientLight);
 
-    // Single overhead light - cold and harsh
-    const overheadLight = new THREE.PointLight(0x8888aa, 0.8, 15);
+    // Single overhead light - cold and harsh (brighter)
+    const overheadLight = new THREE.PointLight(0x9999cc, 1.2, 20);
     overheadLight.position.set(0, 4, 0);
     overheadLight.castShadow = true;
     scene.add(overheadLight);
 
+    // Spotlight on coffee table area for visibility
+    const tableLight = new THREE.SpotLight(0x7777aa, 0.8, 10, Math.PI / 6);
+    tableLight.position.set(0, 3, 2.5);
+    tableLight.target.position.set(0, 0.6, 2.5);
+    scene.add(tableLight);
+    scene.add(tableLight.target);
+
     // Flickering TV light from side
-    const tvLight = new THREE.PointLight(0x6666ff, 0.4, 8);
+    const tvLight = new THREE.PointLight(0x6666ff, 0.5, 10);
     tvLight.position.set(5, 1.5, -5);
     scene.add(tvLight);
     scene.userData.tvLight = tvLight;
 
     // Window ambient from outside
-    const windowLight = new THREE.PointLight(0x4444aa, 0.2, 10);
+    const windowLight = new THREE.PointLight(0x5555aa, 0.4, 12);
     windowLight.position.set(-5, 2, -6);
     scene.add(windowLight);
 }
@@ -436,24 +461,29 @@ function createFamilyFigures() {
 function createHumanFigure(color, height) {
     const figure = new THREE.Group();
 
-    // Body
+    // Body - Made brighter and more visible
     const body = new THREE.Mesh(
         new THREE.CapsuleGeometry(0.25, height * 0.5, 8, 16),
         new THREE.MeshStandardMaterial({
             color: color,
-            roughness: 0.8
+            roughness: 0.7,
+            metalness: 0.1,
+            emissive: color,
+            emissiveIntensity: 0.15
         })
     );
     body.position.y = height * 0.5;
     body.castShadow = true;
     figure.add(body);
 
-    // Head
+    // Head - Made brighter
     const head = new THREE.Mesh(
         new THREE.SphereGeometry(0.18, 16, 16),
         new THREE.MeshStandardMaterial({
-            color: 0xccaa99,
-            roughness: 0.9
+            color: 0xddbb99,
+            roughness: 0.8,
+            emissive: 0x553322,
+            emissiveIntensity: 0.1
         })
     );
     head.position.y = height * 0.85;
