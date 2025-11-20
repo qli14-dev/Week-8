@@ -1,277 +1,406 @@
-# 🌟 Dreamlike Memory Scene
+# 🎭 Family Choice – Interactive 3D Narrative
 
-An immersive 3D interactive experience that transports you back to a nostalgic high school memory. Built with Three.js, this web-based experience combines beautiful visuals, smooth interactions, and a dreamlike atmosphere.
+A choice-driven immersive 3D experience where your decisions shape completely different emotional worlds. Built with Three.js, this interactive narrative explores the profound impact of choosing communication versus solitude during a family conflict.
 
-![Dreamlike Memory Scene](https://img.shields.io/badge/Three.js-r128-blue) ![Status](https://img.shields.io/badge/status-ready-green)
+![Three.js](https://img.shields.io/badge/Three.js-r128-blue) ![Status](https://img.shields.io/badge/status-complete-green) ![Interactive](https://img.shields.io/badge/type-interactive%20narrative-purple)
 
-## ✨ Features
+## ✨ Overview
 
-### Visual Experience
-- **Nostalgic 3D Classroom**: A beautifully rendered classroom with warm, golden lighting
-- **Dreamlike Atmosphere**: Soft pastels, glowing effects, and ethereal particle systems
-- **Realistic Lighting**: Multiple light sources including golden sunlight streaming through windows
-- **Subtle Reflections**: Physically-based materials with realistic glass and water effects
-- **Warm Color Palette**: Pastel tones and soft golden hues create a memory-like ambiance
+**Family Choice** is an emotional 3D journey that begins in a tense living room during a family argument. You're presented with two choices that lead to dramatically different worlds:
 
-### Interactions
-- **Letter Introduction**: Click an old letter to enter the memory world
-- **Interactive Water Glass**: Click the desk to drink water with smooth animations
-- **Mouse-Based Camera**: Move your mouse left and right to explore the classroom
-- **Floating Particles**: Watch light particles drift through the air
-- **Ambient Animations**: Subtle breathing effects and gentle movements
+- **COMMUNICATE** → A warm, forgiving family reunion filled with golden light
+- **LEAVE** → A lonely journey through a dark futuristic city at night
 
-### Audio (Optional)
-- **Ambient Soundscape**: Continuous background atmosphere
-- **Water Sounds**: Realistic drinking sound effects
-- **Transition Audio**: Smooth audio cues during scene changes
+Each path features unique:
+- 3D environments and atmospheres
+- Interactive elements
+- Emotional tones
+- Visual effects
+- Soundscapes
+
+## 🌍 The Three Worlds
+
+### 1. **The Argument** (Opening Scene)
+A dim, tense living room where emotions run high:
+- Flickering overhead lights
+- Dark, muted colors (grays and blues)
+- Shaking objects reflecting emotional turbulence
+- Silhouetted family members
+- Heavy, oppressive atmosphere
+- Two glowing choice buttons appear after 3 seconds
+
+### 2. **COMMUNICATE** (Warm Ending)
+Choose to stay and talk. Transform into a bright, healing moment:
+- **Visual Atmosphere**: Golden sunlight, warm pastels, soft dust particles
+- **Family**: Three family members with welcoming body language
+- **Interactions**:
+  - Tap family members → animations + heartwarming messages
+  - Drag across screen → create glowing warmth particles
+  - Messages appear: "It's okay", "We're here", "Let's talk"
+- **Lighting**: Warm golden tones, soft shadows, forgiving ambiance
+- **Mood**: Hopeful, healing, together
+
+### 3. **LEAVE** (Solitude Ending)
+Choose to walk away. Enter a vast, lonely cyberpunk city:
+- **Visual Atmosphere**: Dark blues, neon lights, fog, rain-wet pavement
+- **Environment**: Towering skyscrapers disappearing into mist, 30+ buildings
+- **Character**: Lone figure with backpack, symbolizing departure
+- **Interactions**:
+  - Drag to rotate camera → 360° view around character
+  - Tap neon lights → flicker and glitch effects
+  - Tap ground → character walks forward with footstep animation
+  - Moving fog particles
+- **Lighting**: Cold neon (pink, cyan, purple, yellow), minimal warmth
+- **Mood**: Isolated, contemplative, open-ended
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
-- A local web server (required for Three.js to load properly)
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Local web server (required for Three.js)
 
 ### Installation
 
-1. **Clone or download this repository**
+1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd Week-8
    ```
 
-2. **Start a local web server**
+2. **Start a local server**
 
-   **Option A: Using Python (recommended)**
+   **Python 3:**
    ```bash
-   # Python 3
    python -m http.server 8000
-
-   # Python 2
-   python -m SimpleHTTPServer 8000
    ```
 
-   **Option B: Using Node.js**
+   **Node.js:**
    ```bash
    npx http-server -p 8000
    ```
 
-   **Option C: Using PHP**
-   ```bash
-   php -S localhost:8000
+   **VS Code:**
+   - Install "Live Server" extension
+   - Right-click `index.html` → "Open with Live Server"
+
+3. **Open browser**
+   ```
+   http://localhost:8000
    ```
 
-   **Option D: Using VS Code**
-   - Install the "Live Server" extension
-   - Right-click `index.html` and select "Open with Live Server"
+## 🎮 How to Experience
 
-3. **Open your browser**
-   - Navigate to `http://localhost:8000`
-   - You should see the loading screen, followed by the letter introduction
+### Initial Screens
+1. **Loading Screen** (1.5s) - "Loading your story..."
+2. **Intro Screen** - "Family Choice: A moment that changed everything"
+3. Click **"Begin Your Story"** button
 
-## 🎮 How to Use
+### The Argument Scene
+- Watch the tense living room environment
+- Objects shake, lights flicker
+- After 3 seconds, two choices appear
 
-1. **Start**: Click the old letter to enter the memory world
-2. **Look Around**: Move your mouse left and right to explore the classroom
-3. **Interact**: Click on the water glass on the desk to drink water
-4. **Immerse**: Enjoy the floating particles, gentle animations, and nostalgic atmosphere
+### Making Your Choice
 
-## 🎵 Adding Audio (Optional)
+**Option 1: COMMUNICATE**
+- Click the warm-colored button
+- Experience the transformation to golden light
+- Tap on family members to see messages
+- Drag your mouse/finger to create particle effects
+- Feel the warmth and healing
 
-The experience includes audio support for enhanced immersion. To add audio files:
+**Option 2: LEAVE**
+- Click the cold-colored button
+- Enter the dark cyberpunk city
+- Drag to look around (360° camera)
+- Tap neon lights to make them flicker
+- Tap the ground to walk forward
+- Experience solitude
 
-1. Create three audio files in MP3 format:
-   - `ambient.mp3` - Soft ambient background music or nature sounds (2-3 minutes, looped)
-   - `water.mp3` - Water drinking sound effect (2-3 seconds)
-   - `transition.mp3` - Gentle transition sound (3-5 seconds)
+## 🎨 Interactive Features
 
-2. Place them in the root directory alongside `index.html`
+### Argument Scene
+- ⚡ Flickering overhead light
+- 📦 Shaking objects (table, vase)
+- 👥 Trembling silhouettes
+- 🌫️ Oppressive fog
 
-3. **Recommended Audio**:
-   - **Ambient**: Soft piano, gentle rain, or classroom ambience
-   - **Water**: Glass clink and liquid drinking sounds
-   - **Transition**: Soft whoosh or gentle chime
+### Communicate Scene
+- 👨‍👩‍👧 **Clickable Family Members**: Tap to see animations + messages
+- ✨ **Particle Creation**: Drag to spread golden warmth
+- 💬 **Message System**: "It's okay", "We're here", "Let's talk"
+- 🎹 **Piano Chimes**: Gentle sounds on interaction
+- ☀️ **Golden Particles**: 150 floating dust motes
+- 🪟 **Sunlit Window**: Warm light streaming through
 
-4. **Free Audio Resources**:
-   - [Freesound.org](https://freesound.org)
-   - [Free Music Archive](https://freemusicarchive.org)
-   - [Incompetech](https://incompetech.com)
-
-**Note**: The experience works perfectly without audio files. The application will gracefully handle missing audio.
+### Leave Scene
+- 🎥 **360° Camera**: Drag to orbit around character
+- 🌃 **30 Skyscrapers**: Varying heights with neon lights
+- 💡 **Clickable Lights**: Tap to trigger flicker effects
+- 👣 **Walking System**: Tap ground to move forward
+- 🌫️ **Dynamic Fog**: 100 particles drifting through streets
+- 🎒 **Character Detail**: Backpack symbolizing journey
 
 ## 📁 Project Structure
 
 ```
 Week-8/
-├── index.html          # Main HTML structure
-├── style.css           # Styling and animations
-├── app.js              # Three.js scene and interactions
+├── index.html          # HTML structure with all UI elements
+├── style.css           # Comprehensive styling for all scenes
+├── app.js              # Three.js scenes, interactions, animations
+├── package.json        # Project metadata
 ├── README.md           # This file
-└── (optional audio files)
-    ├── ambient.mp3     # Background ambient sound
-    ├── water.mp3       # Water drinking sound
-    └── transition.mp3  # Scene transition sound
+└── (optional audio)
+    ├── ambient-tense.mp3    # Tense family argument ambience
+    ├── ambient-warm.mp3     # Warm family reunion sounds
+    ├── ambient-city.mp3     # Dark city night atmosphere
+    ├── piano-chime.mp3      # Interaction sound (communicate)
+    └── footstep.mp3         # Walking sound (leave)
 ```
 
-## 🎨 Customization
+## 🎵 Audio Design (Optional)
 
-### Changing Colors
+The experience includes audio hooks for enhanced immersion. Add MP3 files:
 
-Edit the color values in `app.js`:
+### Recommended Sounds
 
-```javascript
-// Scene background
-scene.background = new THREE.Color(0xffe4c4);
+**ambient-tense.mp3** (Argument Scene)
+- Heavy breathing, muffled voices
+- Tense strings or low drones
+- 30-60 seconds, looped
+- Volume: 30%
 
-// Fog color
-scene.fog = new THREE.Fog(0xffd4a3, 10, 50);
+**ambient-warm.mp3** (Communicate Scene)
+- Soft wind, gentle room tone
+- Warm ambient pad
+- Distant friendly chatter
+- 60-90 seconds, looped
+- Volume: 40%
 
-// Light colors
-const sunLight = new THREE.DirectionalLight(0xffd89b, 1.5);
-```
+**ambient-city.mp3** (Leave Scene)
+- Distant traffic hum
+- Wind between buildings
+- Electronic ambience
+- Occasional car horn
+- 90-120 seconds, looped
+- Volume: 30%
 
-### Adjusting Camera Sensitivity
+**piano-chime.mp3** (Interaction)
+- Gentle piano note or chime
+- 1-2 seconds
+- Volume: 50%
 
-In `app.js`, modify these constants:
+**footstep.mp3** (Walking)
+- Single footstep on pavement
+- Echo/reverb
+- 0.5-1 seconds
+- Volume: 60%
 
-```javascript
-const CAMERA_MOVE_SPEED = 0.02;      // How fast camera follows mouse
-const MOUSE_SENSITIVITY = 0.0003;     // Mouse movement sensitivity
-```
+### Free Audio Resources
+- [Freesound.org](https://freesound.org)
+- [BBC Sound Effects](https://sound-effects.bbcrewind.co.uk/)
+- [Zapsplat](https://www.zapsplat.com/)
 
-### Adding More Objects
-
-You can add more interactive objects by:
-1. Creating geometry and materials in a function
-2. Adding `userData.clickable = true` to make it clickable
-3. Handling clicks in the `onMouseClick` function
+**Note**: The experience works perfectly without audio.
 
 ## 🛠️ Technical Details
 
-### Technologies Used
-- **Three.js r128**: 3D rendering and scene management
-- **WebGL**: Hardware-accelerated 3D graphics
+### Technologies
+- **Three.js r128**: 3D rendering engine
+- **WebGL**: Hardware-accelerated graphics
 - **Web Audio API**: Sound management
-- **CSS3**: Animations and transitions
-- **Vanilla JavaScript**: No frameworks required
+- **CSS3**: UI animations and transitions
+- **Vanilla JavaScript**: No frameworks
+
+### 3D Scene Features
+- **Advanced Lighting**:
+  - Argument: Single harsh point light
+  - Communicate: Multiple warm lights (directional, point, ambient)
+  - Leave: Minimal ambient + colored neon point lights
+
+- **Materials**:
+  - PBR (Physically Based Rendering)
+  - Glass with transmission
+  - Metallic surfaces in city
+  - Proper roughness values
+
+- **Particles**:
+  - BufferGeometry for performance
+  - Additive blending
+  - Custom velocities
+  - Auto-cleanup system
+
+- **Interactions**:
+  - Raycasting for click detection
+  - Touch support (mobile)
+  - Smooth camera transitions
+  - Animation queuing
 
 ### Performance Optimizations
-- Shadow map optimization with PCFSoftShadowMap
-- Efficient particle system with BufferGeometry
-- Tone mapping for better color reproduction
-- Fog for depth perception and performance
-- Device pixel ratio capping for mobile devices
+- Shadow map optimization (2048x2048)
+- Particle count balancing
+- Fog for depth and culling
+- Efficient material reuse
+- Device pixel ratio capping
+- Geometry disposal on scene change
 
 ### Browser Compatibility
 - ✅ Chrome 90+
 - ✅ Firefox 88+
 - ✅ Safari 14+
 - ✅ Edge 90+
-- ⚠️ Mobile browsers (reduced performance, touch support limited)
+- ⚠️ Mobile (works, but desktop recommended)
 
-## 🎯 Features Breakdown
+## 🎯 Design Philosophy
 
-### 1. Letter Introduction
-- Elegant typography with serif fonts
-- Floating animation with glow effects
-- Smooth fade transition to 3D scene
-- Poetic content that sets the mood
+### Emotional Contrast
+Each choice creates a **completely different emotional world**:
 
-### 2. 3D Classroom Environment
-- Wooden floor with realistic materials
-- Cream-colored walls
-- Chalkboard on the back wall
-- Three windows with golden sunlight
-- Proper shadow casting and receiving
+| Aspect | COMMUNICATE | LEAVE |
+|--------|-------------|-------|
+| **Color Palette** | Golden, warm pastels | Dark blues, neon accents |
+| **Lighting** | Soft, forgiving, warm | Harsh, cold, flickering |
+| **Atmosphere** | Healing, together | Isolated, contemplative |
+| **Interactions** | Intimate, personal | Distant, environmental |
+| **Message** | Connection heals | Freedom has a cost |
 
-### 3. Lighting System
-- **Ambient Light**: Soft warm base lighting
-- **Sun Light**: Directional light with shadows
-- **Fill Light**: Point light for softer shadows
-- **Rim Light**: Adds depth and dimension
-- **Atmosphere Light**: Animated pulsing effect
+### Visual Language
+- **Argument**: Instability (shaking, flickering)
+- **Communicate**: Warmth (gold, soft edges, particles)
+- **Leave**: Vastness (scale, fog, endless city)
 
-### 4. Interactive Elements
-- **Water Glass**: Click to trigger drinking animation
-  - Glass lifts up
-  - Water level decreases
-  - Glass returns to desk
-  - Water automatically refills
-- **Camera Control**: Smooth mouse-based movement
-- **Particle System**: 200 floating light particles
+## 🔧 Customization
 
-### 5. Visual Effects
-- Particle system with additive blending
-- Realistic glass materials with transmission
-- Water with transparency and refraction
-- Window light rays
-- Subtle ambient animations
+### Change Scene Colors
+
+**app.js - Communicate Scene:**
+```javascript
+scene.background = new THREE.Color(0xffe4c4); // Warm peach
+scene.fog = new THREE.Fog(0xffd4a3, 10, 30);  // Golden fog
+```
+
+**app.js - Leave Scene:**
+```javascript
+scene.background = new THREE.Color(0x0a0a15); // Dark blue-black
+scene.fog = new THREE.Fog(0x0a0a15, 10, 80);  // Deep fog
+```
+
+### Adjust Interaction Sensitivity
+
+```javascript
+// Camera rotation speed (Leave scene)
+targetCameraRotationY -= deltaX * 0.005; // Lower = slower
+
+// Particle creation rate (Communicate scene)
+// Modify in onMouseMove function
+```
+
+### Add More Buildings
+
+In `createFuturisticCity()`:
+```javascript
+for (let i = 0; i < 50; i++) { // Increase from 30 to 50
+    // ...building creation code
+}
+```
 
 ## 🐛 Troubleshooting
 
-### Black Screen or Blank Page
-- Make sure you're running a local web server
-- Check browser console for errors (F12)
-- Verify Three.js is loading from CDN
+### Scene Not Loading
+- ✓ Check local server is running
+- ✓ Open browser console (F12) for errors
+- ✓ Verify Three.js CDN loads (check Network tab)
+
+### Interactions Not Working
+- ✓ Click "Begin Your Story" first
+- ✓ Wait for choice buttons to appear (3 seconds)
+- ✓ Choose a path before interacting
+
+### Performance Issues
+- Lower particle counts in `app.js`
+- Reduce building count (Leave scene)
+- Disable shadows: `renderer.shadowMap.enabled = false`
 
 ### Audio Not Playing
 - Audio files are optional
-- Check browser console for error messages
-- Some browsers require user interaction before playing audio
-- Ensure audio files are in the correct format (MP3)
+- Browsers may block autoplay
+- Check volume settings
+- Verify file formats (MP3)
 
-### Poor Performance
-- Try reducing particle count in `app.js` (line ~308)
-- Disable shadows by setting `renderer.shadowMap.enabled = false`
-- Reduce shadow map resolution
+## 📱 Mobile Experience
 
-### Mouse Controls Not Working
-- Wait for the scene to fully load
-- Click the letter first to enter the scene
-- Check if JavaScript is enabled
+The narrative works on mobile with adaptations:
+- Touch to select choices
+- Drag gestures for interactions
+- Tap for clicking objects
+- Reduced particle counts automatically
+- Responsive UI sizing
 
-## 📱 Mobile Support
+**Best experienced on desktop for full visual fidelity.**
 
-The experience is optimized for desktop but works on mobile devices with limitations:
-- Touch support is basic (tap to interact)
-- Camera controls use touch movement
-- Performance may vary based on device
-- Audio may require user interaction to start
+## 🎓 Learning Outcomes
 
-## 🎓 Learning Resources
+This project demonstrates:
+- **Narrative Design**: Choice-driven storytelling in 3D
+- **Scene Management**: Multiple distinct 3D environments
+- **Emotional Design**: Using color, light, and space for mood
+- **Interaction Design**: Context-appropriate interactions per scene
+- **Performance**: Optimizing 3D for web browsers
+- **UX Flow**: Guiding users through an experience
 
-If you want to learn more about the technologies used:
-- [Three.js Documentation](https://threejs.org/docs/)
-- [Three.js Examples](https://threejs.org/examples/)
-- [WebGL Fundamentals](https://webglfundamentals.org/)
-- [MDN Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+## 🌟 Key Code Sections
 
-## 📝 License
+### Scene Switching
+`app.js:412-428` - `choosePath()` function manages transitions
 
-This project is open source and available for educational purposes.
+### Family Interaction
+`app.js:857-902` - Click detection and message system
 
-## 🙏 Credits
+### City Camera Control
+`app.js:1115-1130` - Orbital camera around character
 
-- **Three.js**: Amazing 3D library by Ricardo Cabello (mrdoob)
-- **Inspiration**: Nostalgic memories of school days
-- **Design**: Dreamlike aesthetics and warm color theory
+### Particle Systems
+- `app.js:592-623` - Floating dust (Communicate)
+- `app.js:625-655` - Interactive warmth particles
+- `app.js:820-851` - City fog (Leave)
 
 ## 🚀 Future Enhancements
 
-Potential features to add:
-- [ ] More interactive objects (books, pencils, etc.)
-- [ ] Multiple classroom scenes
-- [ ] VR support with WebXR
-- [ ] Procedural audio generation
-- [ ] Seasonal variations
-- [ ] Student desk interactions
-- [ ] Time of day changes
-- [ ] Save/load camera positions
-- [ ] Screenshot functionality
+- [ ] More choice branches (3-4 paths)
+- [ ] Voice acting for messages
+- [ ] VR support (WebXR)
+- [ ] Save/replay choices
+- [ ] Procedural city generation
+- [ ] Day/night cycle in city
+- [ ] Weather effects
+- [ ] Character customization
+- [ ] Multiplayer shared choices
 
-## 💬 Feedback
+## 💡 Inspiration
 
-Enjoy exploring your memories! Feel free to customize and expand upon this experience.
+This experience explores:
+- The weight of our choices
+- How environments reflect emotions
+- The contrast between connection and isolation
+- Visual storytelling through 3D space
+- Interactive emotional narratives
+
+## 📝 License
+
+Open source for educational purposes.
+
+## 🙏 Credits
+
+- **Three.js**: Ricardo Cabello (mrdoob) and contributors
+- **Concept**: Exploring family dynamics through interactive 3D
+- **Design**: Emotional contrast through visual language
+
+## 💬 Experience Notes
+
+> "Every choice creates a different world. One filled with warmth and healing, the other with vast possibility and solitude. Neither is wrong—both are human."
 
 ---
 
-**Made with ❤️ and nostalgia**
+**Made with ❤️ and thoughtful design**
+
+*Which path will you choose?*

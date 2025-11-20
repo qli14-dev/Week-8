@@ -1,18 +1,31 @@
 // ===================================
-// DREAMLIKE MEMORY SCENE
-// A 3D Interactive Experience
+// FAMILY CHOICE - INTERACTIVE 3D NARRATIVE
+// A Choice-Driven Experience
 // ===================================
 
 // Global variables
 let scene, camera, renderer, raycaster, mouse;
-let classroom, desk, waterGlass, particles;
-let clock, ambientSound, isSceneActive = false;
-let mouseX = 0, mouseY = 0;
-let targetCameraX = 0, targetCameraY = 0;
+let clock;
+let currentScene = 'intro'; // intro, argument, communicate, leave
+let isSceneActive = false;
 
-// Constants
-const CAMERA_MOVE_SPEED = 0.02;
-const MOUSE_SENSITIVITY = 0.0003;
+// Scene-specific objects
+let livingRoom, familyMembers = [];
+let warmScene, warmFamily = [];
+let cityScene, characterModel, cityLights = [];
+let particles, fog;
+
+// Mouse tracking
+let mouseX = 0, mouseY = 0;
+let isDragging = false;
+let previousMouseX = 0, previousMouseY = 0;
+
+// Camera control
+let targetCameraRotationX = 0, targetCameraRotationY = 0;
+let cameraRotationX = 0, cameraRotationY = 0;
+
+// Audio
+let audioContext;
 
 // ===================================
 // INITIALIZATION
@@ -24,21 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function init() {
-    // Remove loading screen after a delay
+    // Remove loading screen
     setTimeout(() => {
         const loadingScreen = document.getElementById('loading-screen');
         loadingScreen.classList.add('fade-out');
         setTimeout(() => loadingScreen.style.display = 'none', 1000);
     }, 1500);
 
-    // Initialize Three.js components
+    // Initialize Three.js
     initThreeJS();
-    createLighting();
-    createClassroom();
-    createDesk();
-    createWaterGlass();
-    createParticles();
-    createWindows();
 
     // Start animation loop
     animate();
@@ -51,18 +58,16 @@ function init() {
 function initThreeJS() {
     // Scene setup
     scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xffd4a3, 10, 50);
-    scene.background = new THREE.Color(0xffe4c4);
+    scene.background = new THREE.Color(0x000000);
 
     // Camera setup
     camera = new THREE.PerspectiveCamera(
-        60,
+        75,
         window.innerWidth / window.innerHeight,
         0.1,
         1000
     );
-    camera.position.set(0, 1.6, 5);
-    camera.lookAt(0, 1.5, 0);
+    camera.position.set(0, 1.6, 3);
 
     // Renderer setup
     const canvas = document.getElementById('scene-canvas');
@@ -76,9 +81,9 @@ function initThreeJS() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.0;
 
-    // Raycaster for mouse interactions
+    // Raycaster for interactions
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
@@ -87,330 +92,37 @@ function initThreeJS() {
 }
 
 // ===================================
-// LIGHTING SYSTEM
-// ===================================
-
-function createLighting() {
-    // Ambient light - soft and warm
-    const ambientLight = new THREE.AmbientLight(0xffd4a3, 0.5);
-    scene.add(ambientLight);
-
-    // Golden sunlight from window
-    const sunLight = new THREE.DirectionalLight(0xffd89b, 1.5);
-    sunLight.position.set(-5, 8, 3);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 50;
-    sunLight.shadow.camera.left = -10;
-    sunLight.shadow.camera.right = 10;
-    sunLight.shadow.camera.top = 10;
-    sunLight.shadow.camera.bottom = -10;
-    scene.add(sunLight);
-
-    // Additional soft fill light
-    const fillLight = new THREE.PointLight(0xffebcd, 0.8, 20);
-    fillLight.position.set(3, 3, 2);
-    scene.add(fillLight);
-
-    // Rim light for depth
-    const rimLight = new THREE.DirectionalLight(0xffc9a3, 0.6);
-    rimLight.position.set(5, 3, -5);
-    scene.add(rimLight);
-
-    // Animated subtle light for atmosphere
-    const atmosphereLight = new THREE.PointLight(0xffd4a3, 0.5, 15);
-    atmosphereLight.position.set(0, 2, 0);
-    atmosphereLight.userData.originalY = 2;
-    scene.add(atmosphereLight);
-
-    // Store for animation
-    scene.userData.atmosphereLight = atmosphereLight;
-}
-
-// ===================================
-// CLASSROOM ENVIRONMENT
-// ===================================
-
-function createClassroom() {
-    classroom = new THREE.Group();
-
-    // Floor
-    const floorGeometry = new THREE.PlaneGeometry(20, 20);
-    const floorMaterial = new THREE.MeshStandardMaterial({
-        color: 0xdeb887,
-        roughness: 0.8,
-        metalness: 0.2
-    });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
-    floor.receiveShadow = true;
-    classroom.add(floor);
-
-    // Walls
-    const wallMaterial = new THREE.MeshStandardMaterial({
-        color: 0xfff8dc,
-        roughness: 0.9,
-        metalness: 0.1
-    });
-
-    // Back wall
-    const backWall = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 6),
-        wallMaterial
-    );
-    backWall.position.set(0, 3, -10);
-    backWall.receiveShadow = true;
-    classroom.add(backWall);
-
-    // Left wall
-    const leftWall = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 6),
-        wallMaterial
-    );
-    leftWall.position.set(-10, 3, 0);
-    leftWall.rotation.y = Math.PI / 2;
-    leftWall.receiveShadow = true;
-    classroom.add(leftWall);
-
-    // Right wall (with windows)
-    const rightWall = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 6),
-        wallMaterial
-    );
-    rightWall.position.set(10, 3, 0);
-    rightWall.rotation.y = -Math.PI / 2;
-    rightWall.receiveShadow = true;
-    classroom.add(rightWall);
-
-    // Ceiling
-    const ceiling = new THREE.Mesh(
-        new THREE.PlaneGeometry(20, 20),
-        new THREE.MeshStandardMaterial({
-            color: 0xfffaf0,
-            roughness: 0.9
-        })
-    );
-    ceiling.rotation.x = Math.PI / 2;
-    ceiling.position.y = 6;
-    ceiling.receiveShadow = true;
-    classroom.add(ceiling);
-
-    // Chalkboard
-    const chalkboard = new THREE.Mesh(
-        new THREE.BoxGeometry(4, 2, 0.1),
-        new THREE.MeshStandardMaterial({
-            color: 0x2f4f2f,
-            roughness: 0.7
-        })
-    );
-    chalkboard.position.set(0, 3, -9.9);
-    classroom.add(chalkboard);
-
-    scene.add(classroom);
-}
-
-// ===================================
-// WINDOWS WITH SUNLIGHT
-// ===================================
-
-function createWindows() {
-    const windowGroup = new THREE.Group();
-
-    for (let i = 0; i < 3; i++) {
-        // Window frame
-        const frameGeometry = new THREE.BoxGeometry(2, 2.5, 0.2);
-        const frameMaterial = new THREE.MeshStandardMaterial({
-            color: 0x8b7355,
-            roughness: 0.6
-        });
-        const frame = new THREE.Mesh(frameGeometry, frameMaterial);
-        frame.position.set(9.9, 3, -4 + i * 3);
-        frame.rotation.y = -Math.PI / 2;
-
-        // Window glass with transparency
-        const glassGeometry = new THREE.PlaneGeometry(1.8, 2.3);
-        const glassMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xffd89b,
-            transparent: true,
-            opacity: 0.3,
-            roughness: 0.1,
-            metalness: 0.1,
-            transmission: 0.9,
-            thickness: 0.5
-        });
-        const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-        glass.position.set(9.85, 3, -4 + i * 3);
-        glass.rotation.y = -Math.PI / 2;
-
-        windowGroup.add(frame);
-        windowGroup.add(glass);
-
-        // Window light rays
-        const rayGeometry = new THREE.ConeGeometry(0.1, 3, 8);
-        const rayMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffd89b,
-            transparent: true,
-            opacity: 0.2
-        });
-        const ray = new THREE.Mesh(rayGeometry, rayMaterial);
-        ray.position.set(8, 3, -4 + i * 3);
-        ray.rotation.z = Math.PI / 2;
-        windowGroup.add(ray);
-    }
-
-    scene.add(windowGroup);
-}
-
-// ===================================
-// INTERACTIVE DESK
-// ===================================
-
-function createDesk() {
-    desk = new THREE.Group();
-    desk.name = 'desk';
-
-    // Desk top
-    const deskTopGeometry = new THREE.BoxGeometry(2, 0.1, 1.2);
-    const deskMaterial = new THREE.MeshStandardMaterial({
-        color: 0xcd853f,
-        roughness: 0.6,
-        metalness: 0.2
-    });
-    const deskTop = new THREE.Mesh(deskTopGeometry, deskMaterial);
-    deskTop.position.y = 1;
-    deskTop.castShadow = true;
-    deskTop.receiveShadow = true;
-    desk.add(deskTop);
-
-    // Desk legs
-    const legGeometry = new THREE.BoxGeometry(0.1, 1, 0.1);
-    const legPositions = [
-        [-0.9, 0.5, -0.5],
-        [0.9, 0.5, -0.5],
-        [-0.9, 0.5, 0.5],
-        [0.9, 0.5, 0.5]
-    ];
-
-    legPositions.forEach(pos => {
-        const leg = new THREE.Mesh(legGeometry, deskMaterial);
-        leg.position.set(...pos);
-        leg.castShadow = true;
-        desk.add(leg);
-    });
-
-    desk.position.set(1, 0, 2);
-    desk.userData.clickable = true;
-    scene.add(desk);
-}
-
-// ===================================
-// WATER GLASS
-// ===================================
-
-function createWaterGlass() {
-    waterGlass = new THREE.Group();
-    waterGlass.name = 'waterGlass';
-
-    // Glass container
-    const glassGeometry = new THREE.CylinderGeometry(0.08, 0.06, 0.15, 16, 1, true);
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.3,
-        roughness: 0.1,
-        metalness: 0.1,
-        transmission: 0.9,
-        thickness: 0.5,
-        clearcoat: 1.0
-    });
-    const glass = new THREE.Mesh(glassGeometry, glassMaterial);
-    glass.castShadow = true;
-    waterGlass.add(glass);
-
-    // Water inside
-    const waterGeometry = new THREE.CylinderGeometry(0.075, 0.058, 0.12, 16);
-    const waterMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0x87ceeb,
-        transparent: true,
-        opacity: 0.6,
-        roughness: 0.1,
-        metalness: 0.1,
-        transmission: 0.8
-    });
-    const water = new THREE.Mesh(waterGeometry, waterMaterial);
-    water.position.y = -0.015;
-    waterGlass.add(water);
-
-    // Glass bottom
-    const bottomGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.01, 16);
-    const bottom = new THREE.Mesh(bottomGeometry, glassMaterial);
-    bottom.position.y = -0.075;
-    waterGlass.add(bottom);
-
-    waterGlass.position.set(1.3, 1.13, 2);
-    waterGlass.userData.clickable = true;
-    waterGlass.userData.water = water;
-    scene.add(waterGlass);
-}
-
-// ===================================
-// PARTICLE SYSTEM
-// ===================================
-
-function createParticles() {
-    const particleCount = 200;
-    const particlesGeometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = [];
-
-    for (let i = 0; i < particleCount; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * 20;
-        positions[i * 3 + 1] = Math.random() * 6;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-
-        velocities.push({
-            x: (Math.random() - 0.5) * 0.01,
-            y: (Math.random() - 0.5) * 0.01,
-            z: (Math.random() - 0.5) * 0.01
-        });
-    }
-
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const particlesMaterial = new THREE.PointsMaterial({
-        color: 0xffd89b,
-        size: 0.05,
-        transparent: true,
-        opacity: 0.6,
-        blending: THREE.AdditiveBlending,
-        sizeAttenuation: true
-    });
-
-    particles = new THREE.Points(particlesGeometry, particlesMaterial);
-    particles.userData.velocities = velocities;
-    scene.add(particles);
-}
-
-// ===================================
 // EVENT LISTENERS
 // ===================================
 
 function setupEventListeners() {
-    // Letter click to enter scene
-    const letterScreen = document.getElementById('letter-screen');
-    const letter = document.querySelector('.letter');
+    // Start button
+    const startButton = document.querySelector('.start-button');
+    if (startButton) {
+        startButton.addEventListener('click', startArgumentScene);
+    }
 
-    letter.addEventListener('click', () => {
-        enterMemoryScene();
-    });
+    // Choice buttons
+    const communicateBtn = document.querySelector('.communicate-btn');
+    const leaveBtn = document.querySelector('.leave-btn');
 
-    // Mouse movement for camera control
+    if (communicateBtn) {
+        communicateBtn.addEventListener('click', () => choosePath('communicate'));
+    }
+    if (leaveBtn) {
+        leaveBtn.addEventListener('click', () => choosePath('leave'));
+    }
+
+    // Mouse events
     window.addEventListener('mousemove', onMouseMove);
-
-    // Click detection for interactive objects
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
     window.addEventListener('click', onMouseClick);
+
+    // Touch events for mobile
+    window.addEventListener('touchstart', onTouchStart, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
 
     // Window resize
     window.addEventListener('resize', onWindowResize);
@@ -422,8 +134,31 @@ function onMouseMove(event) {
     mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    targetCameraX = mouseX * 1.5;
-    targetCameraY = mouseY * 0.8;
+    if (isDragging) {
+        const deltaX = event.clientX - previousMouseX;
+        const deltaY = event.clientY - previousMouseY;
+
+        if (currentScene === 'leave') {
+            targetCameraRotationY -= deltaX * 0.005;
+            targetCameraRotationX -= deltaY * 0.005;
+            targetCameraRotationX = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, targetCameraRotationX));
+        } else if (currentScene === 'communicate') {
+            createWarmthParticles(event.clientX, event.clientY);
+        }
+
+        previousMouseX = event.clientX;
+        previousMouseY = event.clientY;
+    }
+}
+
+function onMouseDown(event) {
+    isDragging = true;
+    previousMouseX = event.clientX;
+    previousMouseY = event.clientY;
+}
+
+function onMouseUp() {
+    isDragging = false;
 }
 
 function onMouseClick(event) {
@@ -433,23 +168,49 @@ function onMouseClick(event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-
-    // Check for intersections with clickable objects
     const intersects = raycaster.intersectObjects(scene.children, true);
 
-    for (let intersect of intersects) {
-        let object = intersect.object;
-
-        // Traverse up to find clickable parent
-        while (object.parent && !object.userData.clickable) {
-            object = object.parent;
-        }
-
-        if (object.userData.clickable && object.name === 'waterGlass') {
-            drinkWater();
-            break;
-        }
+    if (intersects.length > 0) {
+        handleObjectClick(intersects[0].object);
     }
+}
+
+function onTouchStart(event) {
+    if (event.touches.length > 0) {
+        isDragging = true;
+        previousMouseX = event.touches[0].clientX;
+        previousMouseY = event.touches[0].clientY;
+    }
+}
+
+function onTouchMove(event) {
+    if (!isSceneActive || event.touches.length === 0) return;
+
+    event.preventDefault();
+
+    const touch = event.touches[0];
+    mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+    if (isDragging) {
+        const deltaX = touch.clientX - previousMouseX;
+        const deltaY = touch.clientY - previousMouseY;
+
+        if (currentScene === 'leave') {
+            targetCameraRotationY -= deltaX * 0.005;
+            targetCameraRotationX -= deltaY * 0.005;
+            targetCameraRotationX = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, targetCameraRotationX));
+        } else if (currentScene === 'communicate') {
+            createWarmthParticles(touch.clientX, touch.clientY);
+        }
+
+        previousMouseX = touch.clientX;
+        previousMouseY = touch.clientY;
+    }
+}
+
+function onTouchEnd() {
+    isDragging = false;
 }
 
 function onWindowResize() {
@@ -459,122 +220,803 @@ function onWindowResize() {
 }
 
 // ===================================
-// SCENE TRANSITIONS
+// SCENE 1: FAMILY ARGUMENT (DIM LIVING ROOM)
 // ===================================
 
-function enterMemoryScene() {
-    const letterScreen = document.getElementById('letter-screen');
+function startArgumentScene() {
+    currentScene = 'argument';
+
+    // Hide intro screen
+    const introScreen = document.getElementById('intro-screen');
+    introScreen.classList.add('hidden');
+
+    // Show canvas
     const canvas = document.getElementById('scene-canvas');
-    const uiOverlay = document.getElementById('ui-overlay');
-    const transitionSound = document.getElementById('transition-sound');
-    const ambientSoundElement = document.getElementById('ambient-sound');
+    canvas.style.opacity = '1';
 
-    // Play transition sound
-    if (transitionSound) {
-        transitionSound.volume = 0.5;
-        transitionSound.play().catch(e => console.log('Transition sound error:', e));
+    isSceneActive = true;
+
+    // Clear scene
+    clearScene();
+
+    // Create dim living room
+    createDimLivingRoom();
+
+    // Play tense ambient sound
+    playSound('ambient-tense', 0.3, true);
+
+    // Show choices after 3 seconds
+    setTimeout(() => {
+        showChoices();
+    }, 3000);
+}
+
+function createDimLivingRoom() {
+    livingRoom = new THREE.Group();
+
+    // Dim lighting
+    const ambientLight = new THREE.AmbientLight(0x4a4a5a, 0.3);
+    scene.add(ambientLight);
+
+    // Single harsh overhead light
+    const overheadLight = new THREE.PointLight(0x8080a0, 0.8, 15);
+    overheadLight.position.set(0, 3, 0);
+    overheadLight.castShadow = true;
+    scene.add(overheadLight);
+
+    // Flickering light effect
+    overheadLight.userData.flickering = true;
+    scene.userData.overheadLight = overheadLight;
+
+    // Floor
+    const floorGeometry = new THREE.PlaneGeometry(15, 15);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x3a3a4a,
+        roughness: 0.9,
+        metalness: 0.1
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    livingRoom.add(floor);
+
+    // Walls
+    const wallMaterial = new THREE.MeshStandardMaterial({
+        color: 0x4a4a5a,
+        roughness: 0.9
+    });
+
+    // Back wall
+    const backWall = new THREE.Mesh(
+        new THREE.PlaneGeometry(15, 5),
+        wallMaterial
+    );
+    backWall.position.set(0, 2.5, -7);
+    backWall.receiveShadow = true;
+    livingRoom.add(backWall);
+
+    // Side walls
+    const leftWall = new THREE.Mesh(
+        new THREE.PlaneGeometry(15, 5),
+        wallMaterial
+    );
+    leftWall.position.set(-7, 2.5, 0);
+    leftWall.rotation.y = Math.PI / 2;
+    livingRoom.add(leftWall);
+
+    const rightWall = new THREE.Mesh(
+        new THREE.PlaneGeometry(15, 5),
+        wallMaterial
+    );
+    rightWall.position.set(7, 2.5, 0);
+    rightWall.rotation.y = -Math.PI / 2;
+    livingRoom.add(rightWall);
+
+    // Create family members (silhouettes)
+    createFamilySilhouettes();
+
+    // Shaking objects
+    createShakingObjects();
+
+    // Add fog
+    scene.fog = new THREE.Fog(0x2a2a3a, 5, 15);
+    scene.background = new THREE.Color(0x2a2a3a);
+
+    scene.add(livingRoom);
+}
+
+function createFamilySilhouettes() {
+    const personMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a1a2a,
+        roughness: 0.8
+    });
+
+    // Person 1 (left)
+    const person1 = new THREE.Group();
+    const body1 = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8),
+        personMaterial
+    );
+    body1.position.y = 0.75;
+    const head1 = new THREE.Mesh(
+        new THREE.SphereGeometry(0.25, 8, 8),
+        personMaterial
+    );
+    head1.position.y = 1.75;
+    person1.add(body1, head1);
+    person1.position.set(-2, 0, -3);
+    person1.userData.shaking = true;
+    familyMembers.push(person1);
+    livingRoom.add(person1);
+
+    // Person 2 (right)
+    const person2 = person1.clone();
+    person2.position.set(2, 0, -3);
+    person2.userData.shaking = true;
+    familyMembers.push(person2);
+    livingRoom.add(person2);
+
+    // Person 3 (center, slightly back)
+    const person3 = person1.clone();
+    person3.position.set(0, 0, -4);
+    person3.scale.set(0.9, 0.9, 0.9);
+    person3.userData.shaking = true;
+    familyMembers.push(person3);
+    livingRoom.add(person3);
+}
+
+function createShakingObjects() {
+    const objectMaterial = new THREE.MeshStandardMaterial({
+        color: 0x5a4a3a,
+        roughness: 0.7
+    });
+
+    // Table
+    const table = new THREE.Mesh(
+        new THREE.BoxGeometry(2, 0.1, 1),
+        objectMaterial
+    );
+    table.position.set(0, 0.8, 0);
+    table.userData.shaking = true;
+    table.castShadow = true;
+    livingRoom.add(table);
+
+    // Vase on table
+    const vase = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.1, 0.15, 0.3, 8),
+        new THREE.MeshStandardMaterial({ color: 0x8a6a4a })
+    );
+    vase.position.set(0, 1.1, 0);
+    vase.userData.shaking = true;
+    vase.userData.shakeIntensity = 0.02;
+    livingRoom.add(vase);
+}
+
+// ===================================
+// CHOICE SYSTEM
+// ===================================
+
+function showChoices() {
+    const choiceOverlay = document.getElementById('choice-overlay');
+    choiceOverlay.classList.remove('hidden');
+
+    // Animate buttons
+    const buttons = document.querySelectorAll('.choice-btn');
+    buttons.forEach((btn, index) => {
+        setTimeout(() => {
+            btn.style.animation = 'slideIn 0.5s ease forwards';
+        }, index * 200);
+    });
+}
+
+function choosePath(choice) {
+    // Hide choices
+    const choiceOverlay = document.getElementById('choice-overlay');
+    choiceOverlay.classList.add('hidden');
+
+    // Stop tense audio
+    stopSound('ambient-tense');
+
+    // Clear current scene
+    clearScene();
+
+    if (choice === 'communicate') {
+        createCommunicateScene();
+    } else if (choice === 'leave') {
+        createLeaveScene();
+    }
+}
+
+// ===================================
+// SCENE 2: COMMUNICATE (WARM FAMILY REUNION)
+// ===================================
+
+function createCommunicateScene() {
+    currentScene = 'communicate';
+
+    // Show communicate UI
+    const communicateUI = document.getElementById('communicate-ui');
+    communicateUI.classList.remove('hidden');
+
+    // Warm lighting
+    scene.background = new THREE.Color(0xffe4c4);
+    scene.fog = new THREE.Fog(0xffd4a3, 10, 30);
+
+    const ambientLight = new THREE.AmbientLight(0xffd4a3, 0.6);
+    scene.add(ambientLight);
+
+    // Golden sunlight
+    const sunLight = new THREE.DirectionalLight(0xffd89b, 1.8);
+    sunLight.position.set(-5, 8, 3);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    scene.add(sunLight);
+
+    // Additional warm lights
+    const fillLight = new THREE.PointLight(0xffebcd, 1.0, 20);
+    fillLight.position.set(3, 3, 2);
+    scene.add(fillLight);
+
+    // Create warm room
+    createWarmRoom();
+
+    // Create happy family
+    createHappyFamily();
+
+    // Create warm particles
+    createFloatingDustParticles();
+
+    // Play warm ambient sound
+    playSound('ambient-warm', 0.4, true);
+
+    // Position camera
+    camera.position.set(0, 1.6, 5);
+    camera.lookAt(0, 1.5, 0);
+}
+
+function createWarmRoom() {
+    const roomGroup = new THREE.Group();
+
+    // Floor
+    const floorGeometry = new THREE.PlaneGeometry(20, 20);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+        color: 0xdeb887,
+        roughness: 0.8
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    roomGroup.add(floor);
+
+    // Walls
+    const wallMaterial = new THREE.MeshStandardMaterial({
+        color: 0xfff8dc,
+        roughness: 0.9
+    });
+
+    const backWall = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 6),
+        wallMaterial
+    );
+    backWall.position.set(0, 3, -10);
+    backWall.receiveShadow = true;
+    roomGroup.add(backWall);
+
+    // Window with sunlight
+    const windowFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(3, 3, 0.2),
+        new THREE.MeshStandardMaterial({ color: 0x8b7355 })
+    );
+    windowFrame.position.set(-4, 3, -9.9);
+    roomGroup.add(windowFrame);
+
+    const windowGlass = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.8, 2.8),
+        new THREE.MeshPhysicalMaterial({
+            color: 0xffd89b,
+            transparent: true,
+            opacity: 0.4,
+            transmission: 0.9
+        })
+    );
+    windowGlass.position.set(-4, 3, -9.85);
+    roomGroup.add(windowGlass);
+
+    scene.add(roomGroup);
+}
+
+function createHappyFamily() {
+    const personMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffb380,
+        roughness: 0.7
+    });
+
+    // Create 3 family members
+    for (let i = 0; i < 3; i++) {
+        const person = new THREE.Group();
+        person.name = 'familyMember';
+        person.userData.clickable = true;
+        person.userData.memberIndex = i;
+
+        // Body
+        const body = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 1.5, 16),
+            personMaterial
+        );
+        body.position.y = 0.75;
+        body.castShadow = true;
+
+        // Head
+        const head = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 16, 16),
+            personMaterial
+        );
+        head.position.y = 1.75;
+        head.castShadow = true;
+
+        // Arms (reaching out)
+        const armMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffb380,
+            roughness: 0.7
+        });
+        const leftArm = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.08, 0.6, 8),
+            armMaterial
+        );
+        leftArm.position.set(-0.35, 1.2, 0);
+        leftArm.rotation.z = Math.PI / 4;
+
+        const rightArm = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.08, 0.6, 8),
+            armMaterial
+        );
+        rightArm.position.set(0.35, 1.2, 0);
+        rightArm.rotation.z = -Math.PI / 4;
+
+        person.add(body, head, leftArm, rightArm);
+
+        // Position
+        const positions = [
+            [-1.5, 0, 1],
+            [0, 0, 0.5],
+            [1.5, 0, 1]
+        ];
+        person.position.set(...positions[i]);
+
+        warmFamily.push(person);
+        scene.add(person);
+    }
+}
+
+function createFloatingDustParticles() {
+    const particleCount = 150;
+    const particlesGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = [];
+
+    for (let i = 0; i < particleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 15;
+        positions[i * 3 + 1] = Math.random() * 5;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 15;
+
+        velocities.push({
+            x: (Math.random() - 0.5) * 0.01,
+            y: Math.random() * 0.005,
+            z: (Math.random() - 0.5) * 0.01
+        });
     }
 
-    // Fade out letter screen
-    letterScreen.classList.add('hidden');
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-    // Fade in 3D scene
-    setTimeout(() => {
-        canvas.classList.add('visible');
-        uiOverlay.classList.remove('hidden');
-        isSceneActive = true;
+    const particlesMaterial = new THREE.PointsMaterial({
+        color: 0xffd89b,
+        size: 0.08,
+        transparent: true,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending
+    });
 
-        // Start ambient sound
-        if (ambientSoundElement) {
-            ambientSoundElement.volume = 0.3;
-            ambientSoundElement.play().catch(e => console.log('Ambient sound error:', e));
+    particles = new THREE.Points(particlesGeometry, particlesMaterial);
+    particles.userData.velocities = velocities;
+    scene.add(particles);
+}
+
+function createWarmthParticles(x, y) {
+    const particleGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+    const particleMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffd700,
+        transparent: true,
+        opacity: 0.8
+    });
+
+    const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+
+    // Convert screen coordinates to 3D position
+    const vector = new THREE.Vector3(
+        (x / window.innerWidth) * 2 - 1,
+        -(y / window.innerHeight) * 2 + 1,
+        0.5
+    );
+    vector.unproject(camera);
+    const dir = vector.sub(camera.position).normalize();
+    const distance = -camera.position.z / dir.z;
+    const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+
+    particle.position.copy(pos);
+    particle.userData.createdAt = Date.now();
+    particle.userData.velocity = {
+        x: (Math.random() - 0.5) * 0.02,
+        y: Math.random() * 0.03 + 0.02,
+        z: (Math.random() - 0.5) * 0.02
+    };
+
+    scene.add(particle);
+}
+
+// ===================================
+// SCENE 3: LEAVE (DARK FUTURISTIC CITY)
+// ===================================
+
+function createLeaveScene() {
+    currentScene = 'leave';
+
+    // Show leave UI
+    const leaveUI = document.getElementById('leave-ui');
+    leaveUI.classList.remove('hidden');
+
+    // Dark atmosphere
+    scene.background = new THREE.Color(0x0a0a15);
+    scene.fog = new THREE.Fog(0x0a0a15, 10, 80);
+
+    // Minimal ambient light
+    const ambientLight = new THREE.AmbientLight(0x1a1a3a, 0.3);
+    scene.add(ambientLight);
+
+    // Create city
+    createFuturisticCity();
+
+    // Create character
+    createCharacter();
+
+    // Create fog effect
+    createCityFog();
+
+    // Play city ambient sound
+    playSound('ambient-city', 0.3, true);
+
+    // Position camera behind character
+    camera.position.set(0, 2, 5);
+    camera.lookAt(0, 1.6, 0);
+}
+
+function createFuturisticCity() {
+    const cityGroup = new THREE.Group();
+
+    // Ground - wet pavement
+    const groundGeometry = new THREE.PlaneGeometry(100, 100);
+    const groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a1a2a,
+        roughness: 0.3,
+        metalness: 0.5
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    ground.name = 'ground';
+    ground.userData.clickable = true;
+    cityGroup.add(ground);
+
+    // Create skyscrapers
+    for (let i = 0; i < 30; i++) {
+        const height = Math.random() * 30 + 20;
+        const width = Math.random() * 3 + 2;
+        const depth = Math.random() * 3 + 2;
+
+        const buildingGeometry = new THREE.BoxGeometry(width, height, depth);
+        const buildingMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0a0a1a,
+            roughness: 0.7,
+            metalness: 0.3
+        });
+
+        const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+
+        // Position buildings in a grid around the character
+        const angle = (i / 30) * Math.PI * 2;
+        const distance = Math.random() * 30 + 15;
+        building.position.set(
+            Math.cos(angle) * distance,
+            height / 2,
+            Math.sin(angle) * distance
+        );
+
+        building.castShadow = true;
+        building.receiveShadow = true;
+        cityGroup.add(building);
+
+        // Add neon lights to buildings
+        createBuildingLights(building, i);
+    }
+
+    scene.add(cityGroup);
+}
+
+function createBuildingLights(building, index) {
+    const lightCount = Math.floor(Math.random() * 5) + 3;
+
+    for (let i = 0; i < lightCount; i++) {
+        const colors = [0xff006f, 0x00ffff, 0xff00ff, 0x00ff00, 0xffff00];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        const lightGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.1);
+        const lightMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const light = new THREE.Mesh(lightGeometry, lightMaterial);
+        light.position.set(
+            building.position.x + (Math.random() - 0.5) * building.geometry.parameters.width,
+            building.position.y + (Math.random() - 0.5) * building.geometry.parameters.height,
+            building.position.z + building.geometry.parameters.depth / 2 + 0.05
+        );
+
+        light.name = 'cityLight';
+        light.userData.clickable = true;
+        light.userData.originalOpacity = 0.8;
+        light.userData.flickerSpeed = Math.random() * 2 + 1;
+
+        cityLights.push(light);
+        scene.add(light);
+
+        // Add point light for glow
+        const pointLight = new THREE.PointLight(color, 0.5, 5);
+        pointLight.position.copy(light.position);
+        scene.add(pointLight);
+    }
+}
+
+function createCharacter() {
+    characterModel = new THREE.Group();
+    characterModel.name = 'character';
+
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0x2a2a3a,
+        roughness: 0.8
+    });
+
+    // Body
+    const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.3, 0.3, 1.5, 16),
+        bodyMaterial
+    );
+    body.position.y = 0.75;
+    body.castShadow = true;
+
+    // Head
+    const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.25, 16, 16),
+        bodyMaterial
+    );
+    head.position.y = 1.75;
+    head.castShadow = true;
+
+    // Backpack
+    const backpack = new THREE.Mesh(
+        new THREE.BoxGeometry(0.4, 0.5, 0.2),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a2a })
+    );
+    backpack.position.set(0, 1, -0.25);
+    backpack.castShadow = true;
+
+    characterModel.add(body, head, backpack);
+    characterModel.position.set(0, 0, 0);
+
+    scene.add(characterModel);
+}
+
+function createCityFog() {
+    const fogParticleCount = 100;
+    const fogGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(fogParticleCount * 3);
+    const velocities = [];
+
+    for (let i = 0; i < fogParticleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 60;
+        positions[i * 3 + 1] = Math.random() * 3;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
+
+        velocities.push({
+            x: (Math.random() - 0.5) * 0.02,
+            y: 0,
+            z: (Math.random() - 0.5) * 0.02
+        });
+    }
+
+    fogGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const fogMaterial = new THREE.PointsMaterial({
+        color: 0x4a4a6a,
+        size: 2,
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending
+    });
+
+    fog = new THREE.Points(fogGeometry, fogMaterial);
+    fog.userData.velocities = velocities;
+    scene.add(fog);
+}
+
+// ===================================
+// INTERACTION HANDLERS
+// ===================================
+
+function handleObjectClick(object) {
+    if (currentScene === 'communicate') {
+        // Check if clicked on family member
+        let familyMember = object;
+        while (familyMember && familyMember.name !== 'familyMember') {
+            familyMember = familyMember.parent;
         }
-    }, 500);
+
+        if (familyMember && familyMember.name === 'familyMember') {
+            showFamilyMessage(familyMember.userData.memberIndex);
+            animateFamilyMember(familyMember);
+            playSound('piano-chime', 0.5, false);
+        }
+    } else if (currentScene === 'leave') {
+        // Check if clicked on city light
+        if (object.name === 'cityLight') {
+            flickerLight(object);
+        }
+
+        // Check if clicked on ground
+        if (object.name === 'ground') {
+            moveCharacterForward();
+            playSound('footstep', 0.6, false);
+        }
+    }
 }
 
-// ===================================
-// INTERACTIONS
-// ===================================
+function showFamilyMessage(index) {
+    const messages = [
+        "It's okay.",
+        "We're here.",
+        "Let's talk.",
+        "We love you.",
+        "Together we're stronger.",
+        "Thank you for staying."
+    ];
 
-function drinkWater() {
-    const deskMessage = document.getElementById('desk-message');
-    const waterSound = document.getElementById('water-sound');
-
-    // Play water sound
-    if (waterSound) {
-        waterSound.volume = 0.6;
-        waterSound.play().catch(e => console.log('Water sound error:', e));
-    }
-
-    // Show message
-    deskMessage.classList.remove('hidden');
+    const message = messages[index % messages.length];
+    const messageBubble = document.getElementById('message-bubble');
+    messageBubble.textContent = message;
+    messageBubble.classList.remove('hidden');
 
     setTimeout(() => {
-        deskMessage.classList.add('hidden');
-    }, 4000);
-
-    // Animate water glass
-    animateWaterGlass();
+        messageBubble.classList.add('hidden');
+    }, 2500);
 }
 
-function animateWaterGlass() {
-    const initialY = waterGlass.position.y;
-    const water = waterGlass.userData.water;
-    const duration = 2000;
+function animateFamilyMember(member) {
+    const originalY = member.position.y;
     const startTime = Date.now();
+    const duration = 500;
 
     function animate() {
         const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        if (progress < 0.3) {
-            // Lift glass
-            waterGlass.position.y = initialY + Math.sin(progress * Math.PI * 3.33) * 0.3;
-        } else if (progress < 0.7) {
-            // Drink (reduce water level)
-            const drinkProgress = (progress - 0.3) / 0.4;
-            water.scale.y = 1 - drinkProgress * 0.7;
-            water.position.y = -0.015 - drinkProgress * 0.04;
-        } else {
-            // Put down glass
-            const putDownProgress = (progress - 0.7) / 0.3;
-            waterGlass.position.y = initialY + 0.3 * (1 - putDownProgress);
-        }
+        const progress = elapsed / duration;
 
         if (progress < 1) {
+            member.position.y = originalY + Math.sin(progress * Math.PI) * 0.2;
+            member.rotation.y = Math.sin(progress * Math.PI * 2) * 0.1;
             requestAnimationFrame(animate);
         } else {
-            waterGlass.position.y = initialY;
-            // Refill water after a moment
-            setTimeout(() => {
-                animateWaterRefill();
-            }, 1000);
+            member.position.y = originalY;
+            member.rotation.y = 0;
         }
     }
 
     animate();
 }
 
-function animateWaterRefill() {
-    const water = waterGlass.userData.water;
-    const duration = 1500;
+function flickerLight(light) {
+    const originalOpacity = light.material.opacity;
     const startTime = Date.now();
-    const startScale = water.scale.y;
-    const startPosY = water.position.y;
+    const duration = 300;
 
     function animate() {
         const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        water.scale.y = startScale + (1 - startScale) * progress;
-        water.position.y = startPosY + (-0.015 - startPosY) * progress;
+        const progress = elapsed / duration;
 
         if (progress < 1) {
+            light.material.opacity = originalOpacity * (0.2 + Math.random() * 0.8);
             requestAnimationFrame(animate);
+        } else {
+            light.material.opacity = originalOpacity;
         }
     }
 
     animate();
+}
+
+function moveCharacterForward() {
+    if (!characterModel) return;
+
+    const startZ = characterModel.position.z;
+    const targetZ = startZ - 1;
+    const startTime = Date.now();
+    const duration = 500;
+
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = elapsed / duration;
+
+        if (progress < 1) {
+            characterModel.position.z = startZ + (targetZ - startZ) * progress;
+
+            // Bob animation
+            characterModel.position.y = Math.abs(Math.sin(progress * Math.PI * 4)) * 0.1;
+
+            requestAnimationFrame(animate);
+        } else {
+            characterModel.position.z = targetZ;
+            characterModel.position.y = 0;
+        }
+    }
+
+    animate();
+}
+
+// ===================================
+// AUDIO SYSTEM
+// ===================================
+
+function playSound(soundId, volume = 0.5, loop = false) {
+    const sound = document.getElementById(soundId);
+    if (sound) {
+        sound.volume = volume;
+        sound.loop = loop;
+        sound.play().catch(e => console.log(`Sound ${soundId} error:`, e));
+    }
+}
+
+function stopSound(soundId) {
+    const sound = document.getElementById(soundId);
+    if (sound) {
+        sound.pause();
+        sound.currentTime = 0;
+    }
+}
+
+// ===================================
+// SCENE MANAGEMENT
+// ===================================
+
+function clearScene() {
+    // Remove all objects except camera
+    while (scene.children.length > 0) {
+        const object = scene.children[0];
+        if (object.geometry) object.geometry.dispose();
+        if (object.material) {
+            if (Array.isArray(object.material)) {
+                object.material.forEach(mat => mat.dispose());
+            } else {
+                object.material.dispose();
+            }
+        }
+        scene.remove(object);
+    }
+
+    // Clear arrays
+    familyMembers = [];
+    warmFamily = [];
+    cityLights = [];
+    particles = null;
+    fog = null;
 }
 
 // ===================================
@@ -585,60 +1027,138 @@ function animate() {
     requestAnimationFrame(animate);
 
     const elapsedTime = clock.getElapsedTime();
+    const deltaTime = clock.getDelta();
 
-    if (isSceneActive) {
-        // Smooth camera movement based on mouse
-        camera.position.x += (targetCameraX - camera.position.x) * CAMERA_MOVE_SPEED;
-        camera.position.y += (1.6 + targetCameraY - camera.position.y) * CAMERA_MOVE_SPEED;
-        camera.lookAt(0, 1.5, 0);
-
-        // Animate atmosphere light
-        if (scene.userData.atmosphereLight) {
-            const light = scene.userData.atmosphereLight;
-            light.intensity = 0.5 + Math.sin(elapsedTime * 0.5) * 0.2;
-            light.position.y = light.userData.originalY + Math.sin(elapsedTime * 0.3) * 0.5;
-        }
-
-        // Animate particles
-        if (particles) {
-            const positions = particles.geometry.attributes.position.array;
-            const velocities = particles.userData.velocities;
-
-            for (let i = 0; i < positions.length / 3; i++) {
-                positions[i * 3] += velocities[i].x;
-                positions[i * 3 + 1] += velocities[i].y + Math.sin(elapsedTime + i) * 0.001;
-                positions[i * 3 + 2] += velocities[i].z;
-
-                // Wrap particles
-                if (positions[i * 3] > 10) positions[i * 3] = -10;
-                if (positions[i * 3] < -10) positions[i * 3] = 10;
-                if (positions[i * 3 + 1] > 6) positions[i * 3 + 1] = 0;
-                if (positions[i * 3 + 1] < 0) positions[i * 3 + 1] = 6;
-                if (positions[i * 3 + 2] > 10) positions[i * 3 + 2] = -10;
-                if (positions[i * 3 + 2] < -10) positions[i * 3 + 2] = 10;
-            }
-
-            particles.geometry.attributes.position.needsUpdate = true;
-            particles.rotation.y = elapsedTime * 0.05;
-        }
-
-        // Subtle desk breathing animation
-        if (desk) {
-            desk.position.y = Math.sin(elapsedTime * 0.5) * 0.02;
-        }
-
-        // Water glass subtle shimmer
-        if (waterGlass) {
-            waterGlass.rotation.y = Math.sin(elapsedTime * 0.3) * 0.05;
-        }
+    if (currentScene === 'argument') {
+        animateArgumentScene(elapsedTime);
+    } else if (currentScene === 'communicate') {
+        animateCommunicateScene(elapsedTime);
+    } else if (currentScene === 'leave') {
+        animateLeaveScene(elapsedTime, deltaTime);
     }
 
     renderer.render(scene, camera);
+}
+
+function animateArgumentScene(time) {
+    // Flicker overhead light
+    if (scene.userData.overheadLight) {
+        const light = scene.userData.overheadLight;
+        light.intensity = 0.8 + Math.random() * 0.3;
+    }
+
+    // Shake family members and objects
+    familyMembers.forEach(member => {
+        if (member.userData.shaking) {
+            member.position.x += (Math.random() - 0.5) * 0.01;
+            member.position.z += (Math.random() - 0.5) * 0.01;
+            member.rotation.y += (Math.random() - 0.5) * 0.02;
+        }
+    });
+
+    // Shake all objects marked as shaking
+    scene.traverse(obj => {
+        if (obj.userData.shaking) {
+            const intensity = obj.userData.shakeIntensity || 0.01;
+            obj.rotation.z = Math.sin(time * 10) * intensity;
+        }
+    });
+}
+
+function animateCommunicateScene(time) {
+    // Animate floating particles
+    if (particles) {
+        const positions = particles.geometry.attributes.position.array;
+        const velocities = particles.userData.velocities;
+
+        for (let i = 0; i < positions.length / 3; i++) {
+            positions[i * 3] += velocities[i].x;
+            positions[i * 3 + 1] += velocities[i].y + Math.sin(time + i) * 0.001;
+            positions[i * 3 + 2] += velocities[i].z;
+
+            if (positions[i * 3 + 1] > 5) positions[i * 3 + 1] = 0;
+        }
+
+        particles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // Animate warmth particles created by dragging
+    const particlesToRemove = [];
+    scene.children.forEach(child => {
+        if (child.userData.createdAt) {
+            const age = Date.now() - child.userData.createdAt;
+            if (age > 2000) {
+                particlesToRemove.push(child);
+            } else {
+                child.position.x += child.userData.velocity.x;
+                child.position.y += child.userData.velocity.y;
+                child.position.z += child.userData.velocity.z;
+                child.material.opacity = 0.8 * (1 - age / 2000);
+                child.scale.setScalar(1 + age / 1000);
+            }
+        }
+    });
+
+    particlesToRemove.forEach(particle => {
+        scene.remove(particle);
+        if (particle.geometry) particle.geometry.dispose();
+        if (particle.material) particle.material.dispose();
+    });
+
+    // Gentle breathing animation for family
+    warmFamily.forEach((member, index) => {
+        member.position.y = Math.sin(time * 0.5 + index) * 0.05;
+        member.rotation.y = Math.sin(time * 0.3 + index) * 0.1;
+    });
+}
+
+function animateLeaveScene(time, deltaTime) {
+    // Smooth camera rotation based on drag
+    cameraRotationY += (targetCameraRotationY - cameraRotationY) * 0.1;
+    cameraRotationX += (targetCameraRotationX - cameraRotationX) * 0.1;
+
+    if (characterModel) {
+        const radius = 5;
+        camera.position.x = characterModel.position.x + Math.sin(cameraRotationY) * radius;
+        camera.position.z = characterModel.position.z + Math.cos(cameraRotationY) * radius;
+        camera.position.y = 2 + cameraRotationX * 2;
+        camera.lookAt(
+            characterModel.position.x,
+            characterModel.position.y + 1.6,
+            characterModel.position.z
+        );
+    }
+
+    // Flicker city lights
+    cityLights.forEach(light => {
+        if (light.userData.flickerSpeed) {
+            const flicker = Math.sin(time * light.userData.flickerSpeed) * 0.2 + 0.8;
+            light.material.opacity = light.userData.originalOpacity * flicker;
+        }
+    });
+
+    // Animate fog
+    if (fog) {
+        const positions = fog.geometry.attributes.position.array;
+        const velocities = fog.userData.velocities;
+
+        for (let i = 0; i < positions.length / 3; i++) {
+            positions[i * 3] += velocities[i].x;
+            positions[i * 3 + 2] += velocities[i].z;
+
+            if (positions[i * 3] > 30) positions[i * 3] = -30;
+            if (positions[i * 3] < -30) positions[i * 3] = 30;
+            if (positions[i * 3 + 2] > 30) positions[i * 3 + 2] = -30;
+            if (positions[i * 3 + 2] < -30) positions[i * 3 + 2] = 30;
+        }
+
+        fog.geometry.attributes.position.needsUpdate = true;
+    }
 }
 
 // ===================================
 // CONSOLE MESSAGE
 // ===================================
 
-console.log('%c🌟 Dreamlike Memory Scene 🌟', 'color: #ffd89b; font-size: 20px; font-weight: bold;');
-console.log('%cWelcome to your memories...', 'color: #ffd89b; font-size: 14px;');
+console.log('%c🎭 Family Choice - Interactive 3D Narrative 🎭', 'color: #ffd89b; font-size: 20px; font-weight: bold;');
+console.log('%cEvery choice creates a different world...', 'color: #ffd89b; font-size: 14px;');
