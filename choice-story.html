@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choice - An Interactive Journey</title>
+    <link rel="stylesheet" href="choice-style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- 3D Scene Canvas -->
+    <canvas id="scene-canvas"></canvas>
+
+    <!-- Choice Buttons Overlay -->
+    <div id="choice-overlay" class="hidden">
+        <div class="choice-container">
+            <h2 class="choice-title">What will you do?</h2>
+            <button id="communicate-btn" class="choice-button communicate">
+                <span class="button-glow"></span>
+                <span class="button-text">COMMUNICATE</span>
+            </button>
+            <button id="leave-btn" class="choice-button leave">
+                <span class="button-glow"></span>
+                <span class="button-text">LEAVE</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scene Instructions -->
+    <div id="scene-instructions" class="hidden">
+        <div class="instruction-text"></div>
+    </div>
+
+    <!-- Interactive Text Bubbles (for COMMUNICATE scene) -->
+    <div id="text-bubbles" class="hidden"></div>
+
+    <!-- Audio Elements -->
+    <!-- Living Room Scene -->
+    <audio id="ambient-tense" loop>
+        <!-- Tense ambient sound would go here -->
+    </audio>
+    <audio id="voice-argument" loop>
+        <!-- Argument voices would go here -->
+    </audio>
+
+    <!-- Communicate Scene -->
+    <audio id="ambient-warm" loop>
+        <!-- Warm home ambience would go here -->
+    </audio>
+    <audio id="piano-soft" loop>
+        <!-- Soft piano notes would go here -->
+    </audio>
+    <audio id="chimes-light">
+        <!-- Light chimes would go here -->
+    </audio>
+
+    <!-- Leave Scene -->
+    <audio id="wind-cold" loop>
+        <!-- Cold wind sound would go here -->
+    </audio>
+    <audio id="traffic-distant" loop>
+        <!-- Distant traffic would go here -->
+    </audio>
+    <audio id="hum-electronic" loop>
+        <!-- Electronic hums would go here -->
+    </audio>
+    <audio id="footsteps-echo">
+        <!-- Echoing footsteps would go here -->
+    </audio>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Main Application Script -->
+    <script src="choice-app.js"></script>
+</body>
+</html>

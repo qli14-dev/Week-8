@@ -1,8 +1,75 @@
-# 🌟 Dreamlike Memory Scene
+# 🌟 Interactive 3D Experiences
+
+Two immersive 3D interactive experiences built with Three.js. Choose between a nostalgic classroom memory or an emotional choice-based journey where your decisions create entirely different worlds.
+
+![Three.js](https://img.shields.io/badge/Three.js-r128-blue) ![Status](https://img.shields.io/badge/status-ready-green)
+
+---
+
+## 🎭 Choice - An Interactive Journey (NEW!)
+
+**Files**: `choice-story.html`, `choice-style.css`, `choice-app.js`
+
+A choice-based interactive 3D sequence where your decisions shape completely different emotional worlds. Start in a tense family argument and choose between COMMUNICATE or LEAVE - each path leads to a unique environment with distinct visuals, interactions, and atmosphere.
+
+### 🎬 The Three Worlds
+
+#### Scene 1: The Argument (Living Room)
+A dim, tense living room during a family conflict:
+- **Atmosphere**: Dark, oppressive lighting with flickering overhead light
+- **Visuals**: Shaking objects on coffee table, red accent lighting for tension
+- **Emotion**: Conflict, uncertainty, anxiety
+- **Choice**: Two glowing buttons appear - COMMUNICATE or LEAVE
+
+#### Scene 2: COMMUNICATE Path (Warm Family Scene)
+Choose to stay and communicate - transition to a warm, forgiving atmosphere:
+- **Atmosphere**: Sunny, golden lighting with soft dust particles
+- **Visuals**: Warm home environment, family members, golden particles
+- **Interactions**:
+  - Click family members for animations and comforting messages
+  - Drag to move golden dust particles
+  - Text bubbles with heartwarming dialogue
+- **Sound**: Warm home ambience, soft piano notes, light chimes
+- **Emotion**: Love, forgiveness, connection
+
+#### Scene 3: LEAVE Path (Futuristic City)
+Choose to leave - transition to a dark, isolated urban landscape:
+- **Atmosphere**: Cold night in a massive neon city
+- **Visuals**: Endless neon skyline, fog, reflections, you stand alone
+- **Interactions**:
+  - Drag to rotate camera and explore the skyline
+  - Flickering neon lights on buildings
+  - Moving fog with depth
+  - Click to hear echoing footsteps
+- **Sound**: Cold wind, distant traffic, electronic hums, echoing footsteps
+- **Emotion**: Isolation, contemplation, urban loneliness
+
+### ✨ Key Features
+
+- **Branching Narrative**: Two completely different emotional experiences
+- **Dynamic Transitions**: Smooth scene transitions with fade effects
+- **Unique Interactions**: Each path has its own interactive elements
+- **Emotional Contrast**: Warm vs. cold, together vs. alone, light vs. dark
+- **Sound Design**: Different audio landscapes for each world
+- **Visual Storytelling**: Environment tells the emotional story
+
+### 🎮 How to Use (Choice Story)
+
+1. Open `choice-story.html` in a web browser (requires local server)
+2. Wait for the living room scene to load
+3. Experience the tension and observe shaking objects
+4. Choose COMMUNICATE or LEAVE when buttons appear
+5. Explore your chosen world with unique interactions:
+   - **COMMUNICATE**: Click family members, drag particles
+   - **LEAVE**: Drag to rotate camera, click for footsteps
+
+---
+
+## 🏫 Dreamlike Memory Scene (Original)
+
+**Files**: `index.html`, `style.css`, `app.js`
 
 An immersive 3D interactive experience that transports you back to a nostalgic high school memory. Built with Three.js, this web-based experience combines beautiful visuals, smooth interactions, and a dreamlike atmosphere.
-
-![Dreamlike Memory Scene](https://img.shields.io/badge/Three.js-r128-blue) ![Status](https://img.shields.io/badge/status-ready-green)
 
 ## ✨ Features
 
